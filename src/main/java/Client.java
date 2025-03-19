@@ -55,8 +55,9 @@ public class Client {
     private static byte[] receiveFileWithSlidingWindow(InputStream in, int key) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int expectedSeqNum = 0; // Expected sequence number
+        int totalPackets = Integer.MAX_VALUE; // Unknown total packets initially
 
-        while (true) {
+        while (expectedSeqNum < totalPackets) {
             try {
                 // Receive packet
                 DataInputStream dataIn = new DataInputStream(in);
@@ -72,13 +73,13 @@ public class Client {
                     buffer.write(decryptedPacket); // Write packet to buffer
                     sendAck(out, expectedSeqNum); // Send ACK
                     expectedSeqNum++;
+
+                    // Check for end of file
+                    if (packetLength < 1024) {
+                        totalPackets = expectedSeqNum; // Last packet received
+                    }
                 } else {
                     sendAck(out, expectedSeqNum - 1); // Send ACK for the last correctly received packet
-                }
-
-                // Check for end of file
-                if (packetLength < 1024) {
-                    break; // End of file
                 }
             } catch (EOFException e) {
                 System.err.println("End of stream reached unexpectedly.");
@@ -86,6 +87,7 @@ public class Client {
             }
         }
 
+        System.out.println("File reception complete.");
         return buffer.toByteArray();
     }
 
