@@ -106,12 +106,19 @@ public class ClientHandler implements Runnable {
 
             // Wait for ACKs for all packets in the window
             int packetsInWindow = Math.min(windowSize, totalPackets - base);
+            int highestAck = base - 1; // Track the highest consecutive ACK received
+
             for (int i = 0; i < packetsInWindow; i++) {
                 int ack = receiveAck(clientSocket);
-                if (ack >= base) {
-                    base = ack + 1; // Slide the window forward
-                    System.out.println("Window slid to base: " + base);
+                if (ack > highestAck) {
+                    highestAck = ack; // Update the highest consecutive ACK
                 }
+            }
+
+            // Slide the window forward
+            if (highestAck >= base) {
+                base = highestAck + 1; // Slide the window forward
+                System.out.println("Window slid to base: " + base);
             }
         }
         System.out.println("File transmission complete.");
