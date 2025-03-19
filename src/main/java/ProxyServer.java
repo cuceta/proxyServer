@@ -1,3 +1,4 @@
+import javax.net.ssl.HttpsURLConnection;
 import java.net.*;
 import java.io.*;
 import java.util.HashMap;
@@ -72,10 +73,21 @@ public class ProxyServer {
 
         private byte[] fetchFileFromServer(String url) throws IOException {
             URL targetUrl = new URL(url);
-            HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
-            connection.setRequestMethod("GET");
+            URLConnection connection = targetUrl.openConnection();
 
-            InputStream inputStream = connection.getInputStream();
+            InputStream inputStream;
+            if (connection instanceof HttpsURLConnection) {
+                HttpsURLConnection httpsConnection = (HttpsURLConnection) connection;
+                httpsConnection.setRequestMethod("GET");
+                inputStream = httpsConnection.getInputStream();
+            } else if (connection instanceof HttpURLConnection) {
+                HttpURLConnection httpConnection = (HttpURLConnection) connection;
+                httpConnection.setRequestMethod("GET");
+                inputStream = httpConnection.getInputStream();
+            } else {
+                throw new IOException("Unsupported URL protocol: " + url);
+            }
+
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             byte[] data = new byte[1024];
             int bytesRead;
