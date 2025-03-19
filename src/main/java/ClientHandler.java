@@ -130,7 +130,9 @@ public class ClientHandler implements Runnable {
 
     private int receiveAck(Socket socket) throws IOException {
         DataInputStream dataIn = new DataInputStream(socket.getInputStream());
-        return dataIn.readInt(); // Read ACK
+        int ack = dataIn.readInt(); // Read ACK
+        System.out.println("Received ACK: " + ack); // Log the ACK
+        return ack;
     }
 
     private byte[] encrypt(byte[] data, int key) {
