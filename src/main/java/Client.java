@@ -1,5 +1,5 @@
-import java.net.*;
 import java.io.*;
+import java.net.*;
 import java.util.Random;
 
 import static java.lang.System.out;
@@ -14,7 +14,7 @@ public class Client {
         int key = performKeyExchange(in, out);
 
         // Step 2: Send URL to proxy server
-        String url = "http://images.unsplash.com/photo-1726137569888-ce43cc13e414?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg"; // Example URL
+        String url = "https://images.unsplash.com/photo-1726137569888-ce43cc13e414?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg"; // Example URL
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
         writer.write(url + "\n");
         writer.flush();
@@ -53,26 +53,31 @@ public class Client {
         int expectedSeqNum = 0; // Expected sequence number
 
         while (true) {
-            // Receive packet
-            DataInputStream dataIn = new DataInputStream(in);
-            int seqNum = dataIn.readInt(); // Read sequence number
-            int packetLength = dataIn.readInt(); // Read packet length
-            byte[] packetData = new byte[packetLength];
-            dataIn.readFully(packetData); // Read packet data
+            try {
+                // Receive packet
+                DataInputStream dataIn = new DataInputStream(in);
+                int seqNum = dataIn.readInt(); // Read sequence number
+                int packetLength = dataIn.readInt(); // Read packet length
+                byte[] packetData = new byte[packetLength];
+                dataIn.readFully(packetData); // Read packet data
 
-            // Decrypt packet
-            byte[] decryptedPacket = decrypt(packetData, key);
+                // Decrypt packet
+                byte[] decryptedPacket = decrypt(packetData, key);
 
-            if (seqNum == expectedSeqNum) {
-                buffer.write(decryptedPacket); // Write packet to buffer
-                sendAck(out, expectedSeqNum); // Send ACK
-                expectedSeqNum++;
-            } else {
-                sendAck(out, expectedSeqNum - 1); // Send ACK for the last correctly received packet
-            }
+                if (seqNum == expectedSeqNum) {
+                    buffer.write(decryptedPacket); // Write packet to buffer
+                    sendAck(out, expectedSeqNum); // Send ACK
+                    expectedSeqNum++;
+                } else {
+                    sendAck(out, expectedSeqNum - 1); // Send ACK for the last correctly received packet
+                }
 
-            // Check for end of file
-            if (packetLength < 1024) {
+                // Check for end of file
+                if (packetLength < 1024) {
+                    break;
+                }
+            } catch (EOFException e) {
+                System.err.println("End of stream reached unexpectedly.");
                 break;
             }
         }
