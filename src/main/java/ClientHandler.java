@@ -111,6 +111,7 @@ public class ClientHandler implements Runnable {
                 System.out.println("Window slid to base: " + base);
             }
         }
+        System.out.println("File transmission complete.");
     }
 
     private byte[] getPacketData(byte[] fileData, int seqNum) {
