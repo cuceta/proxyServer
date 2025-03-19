@@ -79,7 +79,8 @@ public class Client {
                         totalPackets = expectedSeqNum; // Last packet received
                     }
                 } else {
-                    sendAck(out, expectedSeqNum - 1); // Send ACK for the last correctly received packet
+                    // Send duplicate ACK for the last correctly received packet
+                    sendAck(out, expectedSeqNum - 1);
                 }
             } catch (EOFException e) {
                 System.err.println("End of stream reached unexpectedly.");
