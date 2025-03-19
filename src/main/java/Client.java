@@ -66,6 +66,9 @@ public class Client {
                 byte[] packetData = new byte[packetLength];
                 dataIn.readFully(packetData); // Read packet data
 
+                // Log the received packet
+                System.out.println("Received packet with seqNum: " + seqNum + ", length: " + packetLength);
+
                 // Decrypt packet
                 byte[] decryptedPacket = decrypt(packetData, key);
 
