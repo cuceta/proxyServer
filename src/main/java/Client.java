@@ -78,7 +78,7 @@ public class Client {
 
                 // Check for end of file
                 if (packetLength < 1024) {
-                    break;
+                    break; // End of file
                 }
             } catch (EOFException e) {
                 System.err.println("End of stream reached unexpectedly.");
@@ -100,7 +100,6 @@ public class Client {
         for (int i = 0; i < data.length; i++) {
             result[i] = (byte) (data[i] ^ key); // XOR decryption
         }
-        System.out.println("Decrypted packet of length: " + data.length);
         return result;
     }
 }
