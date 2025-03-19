@@ -108,6 +108,7 @@ public class ClientHandler implements Runnable {
             int ack = receiveAck(clientSocket);
             if (ack >= base) {
                 base = ack + 1; // Slide the window forward
+                System.out.println("Window slid to base: " + base);
             }
         }
     }
