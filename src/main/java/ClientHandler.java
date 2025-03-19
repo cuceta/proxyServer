@@ -107,22 +107,30 @@ public class ClientHandler implements Runnable {
 
             // Wait for ACKs for all packets in the window
             int packetsInWindow = Math.min(windowSize, totalPackets - base);
-            int highestAck = base - 1; // Track the highest consecutive ACK received
+            boolean[] ackReceived = new boolean[packetsInWindow]; // Track ACKs for each packet
 
-            for (int i = 0; i < packetsInWindow; i++) {
+            while (true) {
                 int ack = receiveAck(clientSocket);
-                System.out.println("Received ACK: " + ack); // Log the ACK
-                if (ack > highestAck) {
-                    highestAck = ack; // Update the highest consecutive ACK
-                }
-            }
+                System.out.println("Received ACK: " + ack);
 
-            // Slide the window forward
-            if (highestAck >= base) {
-                base = highestAck + 1; // Slide the window forward
-                System.out.println("Window slid to base: " + base);
-            } else {
-                System.out.println("No valid ACK received. Retransmitting window.");
+                if (ack >= base && ack < base + packetsInWindow) {
+                    ackReceived[ack - base] = true; // Mark the packet as acknowledged
+                }
+
+                // Check if all packets in the window have been acknowledged
+                boolean allAcked = true;
+                for (boolean ackStatus : ackReceived) {
+                    if (!ackStatus) {
+                        allAcked = false;
+                        break;
+                    }
+                }
+
+                if (allAcked) {
+                    base += packetsInWindow; // Slide the window forward
+                    System.out.println("Window slid to base: " + base);
+                    break;
+                }
             }
         }
         System.out.println("File transmission complete.");
