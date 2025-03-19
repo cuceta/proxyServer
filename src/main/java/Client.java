@@ -67,7 +67,7 @@ public class Client {
                 dataIn.readFully(packetData); // Read packet data
 
                 // Log the received packet
-                System.out.println("Received packet with seqNum: " + seqNum + ", length: " + packetLength);
+                out.println("Received packet with seqNum: " + seqNum + ", length: " + packetLength);
 
                 // Decrypt packet
                 byte[] decryptedPacket = decrypt(packetData, key);
@@ -91,7 +91,7 @@ public class Client {
             }
         }
 
-        System.out.println("File reception complete.");
+        out.println("File reception complete.");
         return buffer.toByteArray();
     }
 
