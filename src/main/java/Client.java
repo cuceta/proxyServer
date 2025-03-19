@@ -6,6 +6,17 @@ import static java.lang.System.out;
 
 public class Client {
     public static void main(String[] args) throws IOException {
+        if (args.length < 1) {
+            System.err.println("Usage: java Client <windowSize>");
+            System.exit(1);
+        }
+
+        int windowSize = Integer.parseInt(args[0]); // Read window size from command line
+        if (windowSize != 1 && windowSize != 8 && windowSize != 64) {
+            System.err.println("Invalid window size. Allowed values: 1, 8, 64");
+            System.exit(1);
+        }
+
         Socket socket = new Socket("localhost", 8080); // Connect to proxy server
         InputStream in = socket.getInputStream();
         OutputStream out = socket.getOutputStream();
