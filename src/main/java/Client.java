@@ -68,31 +68,30 @@ public class Client {
                 dataIn.readFully(packetData); // Read packet data
 
                 // Log the received packet
-                out.println("Received packet with seqNum: " + seqNum + ", length: " + packetLength);
+                System.out.println("Received packet with seqNum: " + seqNum + ", length: " + packetLength);
 
                 // Decrypt packet
                 byte[] decryptedPacket = decrypt(packetData, key);
 
                 if (seqNum == expectedSeqNum) {
                     buffer.write(decryptedPacket); // Write packet to buffer
-                    sendAck(out, expectedSeqNum); // Send ACK
                     expectedSeqNum++;
 
                     // Check for end of file
                     if (packetLength < 1024) {
                         totalPackets = expectedSeqNum; // Last packet received
                     }
-                } else {
-                    // Send duplicate ACK for the last correctly received packet
-                    sendAck(out, expectedSeqNum - 1);
                 }
+
+                // Send ACK for the received packet
+                sendAck(out, seqNum);
             } catch (EOFException e) {
                 System.err.println("End of stream reached unexpectedly.");
                 break;
             }
         }
 
-        out.println("File reception complete.");
+        System.out.println("File reception complete.");
         return buffer.toByteArray();
     }
 
