@@ -127,6 +127,7 @@ public class ClientHandler implements Runnable {
         dataOut.writeInt(seqNum); // Send sequence number
         dataOut.writeInt(data.length); // Send packet length
         dataOut.write(data); // Send packet data
+        System.out.println("Sent packet with seqNum: " + seqNum);
     }
 
     private int receiveAck(Socket socket) throws IOException {
