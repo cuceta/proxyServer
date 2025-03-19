@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
 import java.util.Random;
 
 import static java.lang.System.out;
@@ -68,6 +69,7 @@ public class Client {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int expectedSeqNum = 0; // Expected sequence number
         int totalPackets = Integer.MAX_VALUE; // Unknown total packets initially
+        HashMap<Integer, byte[]> outOfOrderPackets = new HashMap<>(); // Buffer for out-of-order packets
 
         while (expectedSeqNum < totalPackets) {
             try {
@@ -92,6 +94,16 @@ public class Client {
                     if (packetLength < 1024) {
                         totalPackets = expectedSeqNum; // Last packet received
                     }
+
+                    // Process buffered out-of-order packets
+                    while (outOfOrderPackets.containsKey(expectedSeqNum)) {
+                        buffer.write(outOfOrderPackets.get(expectedSeqNum));
+                        outOfOrderPackets.remove(expectedSeqNum);
+                        expectedSeqNum++;
+                    }
+                } else {
+                    // Buffer out-of-order packets
+                    outOfOrderPackets.put(seqNum, decryptedPacket);
                 }
 
                 // Send ACK for the received packet
