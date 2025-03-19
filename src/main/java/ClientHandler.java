@@ -111,6 +111,7 @@ public class ClientHandler implements Runnable {
 
             for (int i = 0; i < packetsInWindow; i++) {
                 int ack = receiveAck(clientSocket);
+                System.out.println("Received ACK: " + ack); // Log the ACK
                 if (ack > highestAck) {
                     highestAck = ack; // Update the highest consecutive ACK
                 }
@@ -120,6 +121,8 @@ public class ClientHandler implements Runnable {
             if (highestAck >= base) {
                 base = highestAck + 1; // Slide the window forward
                 System.out.println("Window slid to base: " + base);
+            } else {
+                System.out.println("No valid ACK received. Retransmitting window.");
             }
         }
         System.out.println("File transmission complete.");
