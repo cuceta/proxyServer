@@ -23,7 +23,9 @@ public class Client {
         byte[] fileData = receiveFileWithSlidingWindow(in, key);
 
         // Step 4: Save file to disk
-        FileOutputStream fileOutputStream = new FileOutputStream("/tmp/received_image.jpg");
+        String currentDir = System.getProperty("user.dir"); // Get the current directory
+        String filePath = currentDir + File.separator + "received_image.jpg"; // Construct file path
+        FileOutputStream fileOutputStream = new FileOutputStream(filePath);
         fileOutputStream.write(fileData);
         fileOutputStream.close();
         System.out.println("File received and saved to /tmp/received_image.jpg");
