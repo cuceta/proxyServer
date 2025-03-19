@@ -14,7 +14,7 @@ public class Client {
         int key = performKeyExchange(in, out);
 
         // Step 2: Send URL to proxy server
-        String url = "http://example.com/image.jpg"; // Example URL
+        String url = "http://https://images.unsplash.com/photo-1726137569888-ce43cc13e414?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg"; // Example URL
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
         writer.write(url + "\n");
         writer.flush();
