@@ -22,13 +22,15 @@ public class Client {
         // Step 3: Receive file from proxy server using sliding windows and RTO
         byte[] fileData = receiveFileWithSlidingWindow(in, key);
 
-        // Step 4: Save file to disk
-        String currentDir = System.getProperty("user.dir"); // Get the current directory
-        String filePath = currentDir + File.separator + "received_image.jpg"; // Construct file path
-        FileOutputStream fileOutputStream = new FileOutputStream(filePath);
+        // Step 4: Save file to the current working directory
+        String fileName = "received_image.jpg"; // File name
+        FileOutputStream fileOutputStream = new FileOutputStream(fileName); // Save in the same directory
         fileOutputStream.write(fileData);
         fileOutputStream.close();
-        System.out.println("File received and saved to /tmp/received_image.jpg");
+        System.out.println("File received and saved to: " + new File(fileName).getAbsolutePath());
+
+        // Close the socket after all operations are complete
+        socket.close();
     }
 
     private static int performKeyExchange(InputStream in, OutputStream out) throws IOException {
@@ -90,6 +92,7 @@ public class Client {
     private static void sendAck(OutputStream out, int ack) throws IOException {
         DataOutputStream dataOut = new DataOutputStream(out);
         dataOut.writeInt(ack); // Send ACK
+        System.out.println("Sent ACK: " + ack); // Log the ACK
     }
 
     private static byte[] decrypt(byte[] data, int key) {
