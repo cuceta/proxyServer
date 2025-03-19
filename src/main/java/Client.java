@@ -100,6 +100,7 @@ public class Client {
         for (int i = 0; i < data.length; i++) {
             result[i] = (byte) (data[i] ^ key); // XOR decryption
         }
+        System.out.println("Decrypted packet of length: " + data.length);
         return result;
     }
 }
