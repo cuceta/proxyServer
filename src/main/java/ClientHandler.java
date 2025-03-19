@@ -7,10 +7,12 @@ import java.util.Random;
 public class ClientHandler implements Runnable {
     private Socket clientSocket;
     private int key; // Encryption key
+    private int windowSize; // Window size
     private static HashMap<String, byte[]> cache = new HashMap<>();
 
-    public ClientHandler(Socket socket) {
+    public ClientHandler(Socket socket, int windowSize) {
         this.clientSocket = socket;
+        this.windowSize = windowSize;
     }
 
     @Override
@@ -90,7 +92,6 @@ public class ClientHandler implements Runnable {
     }
 
     private void sendFileWithSlidingWindow(OutputStream out, byte[] fileData) throws IOException {
-        int windowSize = 8; // Define window size
         int base = 0; // Start of the window
         int nextSeqNum = 0; // Next sequence number to send
         int totalPackets = (int) Math.ceil((double) fileData.length / 1024); // Total packets
