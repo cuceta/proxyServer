@@ -104,11 +104,13 @@ public class ClientHandler implements Runnable {
                 nextSeqNum++;
             }
 
-            // Wait for ACKs
-            int ack = receiveAck(clientSocket);
-            if (ack >= base) {
-                base = ack + 1; // Slide the window forward
-                System.out.println("Window slid to base: " + base);
+            // Wait for ACKs for all packets in the window
+            while (base < nextSeqNum) {
+                int ack = receiveAck(clientSocket);
+                if (ack >= base) {
+                    base = ack + 1; // Slide the window forward
+                    System.out.println("Window slid to base: " + base);
+                }
             }
         }
         System.out.println("File transmission complete.");
