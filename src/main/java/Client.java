@@ -45,6 +45,7 @@ public class Client {
         // Step 3: Send client's random number to server
         DataOutputStream dataOut = new DataOutputStream(out);
         dataOut.writeInt(randomNum);
+        dataOut.flush(); // Flush the stream to ensure data is sent immediately
 
         // Step 4: Generate encryption key using XOR
         int key = randomNum ^ serverRandomNum;
