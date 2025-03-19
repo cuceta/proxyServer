@@ -98,6 +98,7 @@ public class Client {
     private static void sendAck(OutputStream out, int ack) throws IOException {
         DataOutputStream dataOut = new DataOutputStream(out);
         dataOut.writeInt(ack); // Send ACK
+        dataOut.flush(); // Flush the stream to ensure data is sent immediately
         System.out.println("Sent ACK: " + ack); // Log the ACK
     }
 
