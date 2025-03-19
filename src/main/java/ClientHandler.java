@@ -116,7 +116,7 @@ public class ClientHandler implements Runnable {
     private byte[] getPacketData(byte[] fileData, int seqNum) {
         int packetSize = 1024;
         int start = seqNum * packetSize;
-        int end = Math.min(start + packetSize, fileData.length);
+        int end = Math.min(start + packetSize, fileData.length); // Handle last packet
         byte[] packetData = new byte[end - start];
         System.arraycopy(fileData, start, packetData, 0, end - start);
         return packetData;
