@@ -105,7 +105,8 @@ public class ClientHandler implements Runnable {
             }
 
             // Wait for ACKs for all packets in the window
-            while (base < nextSeqNum) {
+            int packetsInWindow = Math.min(windowSize, totalPackets - base);
+            for (int i = 0; i < packetsInWindow; i++) {
                 int ack = receiveAck(clientSocket);
                 if (ack >= base) {
                     base = ack + 1; // Slide the window forward
