@@ -21,13 +21,16 @@ public class Client {
             String url = "https://images.unsplash.com/photo-1726137569888-ce43cc13e414?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D.jpg";
             sendRequest(out, url);
 
-            // Step 3: Receive and save file using sliding window protocol
+            // Step 3: Receive file
             byte[] fileData = receiveFileWithSlidingWindow(in, key);
             saveFile(FILE_NAME, fileData);
 
             System.out.println("File received and saved to: " + new File(FILE_NAME).getAbsolutePath());
 
-        } catch (IOException e) {
+            // Wait before closing to allow final ACKs
+            Thread.sleep(500);
+
+        } catch (IOException | InterruptedException e) {
             System.err.println("Client error: " + e.getMessage());
             e.printStackTrace();
         }
