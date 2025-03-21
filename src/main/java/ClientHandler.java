@@ -1,160 +1,128 @@
-import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.*;
-import java.util.HashMap;
-import java.util.Random;
+import java.nio.file.Files;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientHandler implements Runnable {
     private Socket clientSocket;
-    private int key; // Encryption key
-    private int windowSize; // Window size
-    private static HashMap<String, byte[]> cache = new HashMap<>();
+    private static ConcurrentHashMap<String, byte[]> cache = new ConcurrentHashMap<>();
+    private final int windowSize = 5;
+    private final long timeout = 500; // RTO in ms
+    private int key;
 
-    public ClientHandler(Socket socket, int windowSize) {
+    public ClientHandler(Socket socket) {
         this.clientSocket = socket;
-        this.windowSize = windowSize;
     }
 
     @Override
     public void run() {
         try (InputStream in = clientSocket.getInputStream();
              OutputStream out = clientSocket.getOutputStream()) {
-            // Step 1: Perform encryption key exchange
-            performKeyExchange(in, out);
 
-            // Step 2: Receive URL from client
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            String url = reader.readLine(); // Read URL from client
+            key = exchangeKey(in, out); // Ensure key exchange happens correctly
 
-            // Step 3: Fetch file from target server or cache
-            byte[] fileData;
-            if (cache.containsKey(url)) {
-                fileData = cache.get(url); // Serve from cache
-            } else {
-                try {
-                    fileData = fetchFileFromServer(url); // Fetch from target server
-                    cache.put(url, fileData); // Cache the response
-                } catch (IOException e) {
-                    System.err.println("Failed to fetch file from URL: " + url);
-                    fileData = new byte[0]; // Send empty data to indicate failure
-                }
+            String request = readRequest(in);
+            String fileName = parseFileName(request);
+
+            byte[] fileData = cache.computeIfAbsent(fileName, this::fetchFile);
+
+            if (fileData.length == 0) {
+                out.write("HTTP/1.1 404 Not Found\r\n".getBytes());
+                return;
             }
 
-            // Step 4: Encrypt and send file to client using sliding windows and RTO
             sendFileWithSlidingWindow(out, fileData);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void performKeyExchange(InputStream in, OutputStream out) throws IOException {
-        // Step 1: Generate a random number for key exchange
-        Random random = new Random();
-        int randomNum = random.nextInt();
-
-        // Step 2: Send random number to client
-        DataOutputStream dataOut = new DataOutputStream(out);
-        dataOut.writeInt(randomNum);
-
-        // Step 3: Receive client's random number
-        DataInputStream dataIn = new DataInputStream(in);
-        int clientRandomNum = dataIn.readInt();
-
-        // Step 4: Generate encryption key using XOR
-        key = randomNum ^ clientRandomNum;
-        System.out.println("Encryption key generated: " + key);
+    private int exchangeKey(InputStream in, OutputStream out) throws IOException {
+        int clientRand = in.read();
+        int serverRand = (int) (Math.random() * 256);
+        out.write(serverRand);
+        return clientRand ^ serverRand;
     }
 
-    private byte[] fetchFileFromServer(String url) throws IOException {
-        URL targetUrl = new URL(url);
-        URLConnection connection = targetUrl.openConnection();
+    private String readRequest(InputStream in) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        return reader.readLine();
+    }
 
-        InputStream inputStream;
-        if (connection instanceof HttpsURLConnection) {
-            HttpsURLConnection httpsConnection = (HttpsURLConnection) connection;
-            httpsConnection.setRequestMethod("GET");
-            inputStream = httpsConnection.getInputStream();
-        } else if (connection instanceof HttpURLConnection) {
-            HttpURLConnection httpConnection = (HttpURLConnection) connection;
-            httpConnection.setRequestMethod("GET");
-            inputStream = httpConnection.getInputStream();
-        } else {
-            throw new IOException("Unsupported URL protocol: " + url);
-        }
+    private String parseFileName(String request) {
+        return request.split(" ")[1].substring(1); // Extract filename from GET /file HTTP/1.1
+    }
 
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        byte[] data = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(data, 0, data.length)) != -1) {
-            buffer.write(data, 0, bytesRead);
+    private byte[] fetchFile(String fileName) {
+        File file = new File(fileName);
+        if (!file.exists()) return new byte[0];
+        try {
+            return Files.readAllBytes(file.toPath());
+        } catch (IOException e) {
+            return new byte[0];
         }
-        return buffer.toByteArray();
     }
 
     private void sendFileWithSlidingWindow(OutputStream out, byte[] fileData) throws IOException {
-        int windowSize = 8; // Define window size
-        int base = 0; // Start of the window
-        int nextSeqNum = 0; // Next sequence number to send
-        int totalPackets = (int) Math.ceil((double) fileData.length / 1024); // Total packets
+        int base = 0, nextSeqNum = 0;
+        int totalPackets = (int) Math.ceil((double) fileData.length / 1024);
 
         while (base < totalPackets) {
-            // Send packets within the window
             while (nextSeqNum < base + windowSize && nextSeqNum < totalPackets) {
                 byte[] packetData = getPacketData(fileData, nextSeqNum);
-                byte[] encryptedPacket = encrypt(packetData, key); // Encrypt packet
+                byte[] encryptedPacket = encrypt(packetData, key);
                 sendPacket(out, nextSeqNum, encryptedPacket);
                 nextSeqNum++;
             }
 
-            // Wait for ACKs for all packets in the window
-            int packetsInWindow = Math.min(windowSize, totalPackets - base);
-            int highestAck = base - 1; // Track the highest consecutive ACK received
+            long startTime = System.currentTimeMillis();
+            int highestAck = base - 1;
 
-            for (int i = 0; i < packetsInWindow; i++) {
-                int ack = receiveAck(clientSocket);
-                if (ack > highestAck) {
-                    highestAck = ack; // Update the highest consecutive ACK
+            while (System.currentTimeMillis() - startTime < timeout) {
+                if (clientSocket.getInputStream().available() > 0) {
+                    int ack = receiveAck(clientSocket);
+                    if (ack > highestAck) highestAck = ack;
                 }
             }
 
-            // Slide the window forward
-            if (highestAck >= base) {
-                base = highestAck + 1; // Slide the window forward
-                System.out.println("Window slid to base: " + base);
+            if (highestAck < base + windowSize - 1) {
+                System.out.println("Timeout! Retransmitting...");
+                nextSeqNum = base;
+            } else {
+                base = highestAck + 1;
             }
         }
-        System.out.println("File transmission complete.");
-    }
-
-    private byte[] getPacketData(byte[] fileData, int seqNum) {
-        int packetSize = 1024;
-        int start = seqNum * packetSize;
-        int end = Math.min(start + packetSize, fileData.length); // Handle last packet
-        byte[] packetData = new byte[end - start];
-        System.arraycopy(fileData, start, packetData, 0, end - start);
-        return packetData;
-    }
-
-    private void sendPacket(OutputStream out, int seqNum, byte[] data) throws IOException {
-        DataOutputStream dataOut = new DataOutputStream(out);
-        dataOut.writeInt(seqNum); // Send sequence number
-        dataOut.writeInt(data.length); // Send packet length
-        dataOut.write(data); // Send packet data
-        System.out.println("Sent packet with seqNum: " + seqNum);
-    }
-
-    private int receiveAck(Socket socket) throws IOException {
-        DataInputStream dataIn = new DataInputStream(socket.getInputStream());
-        int ack = dataIn.readInt(); // Read ACK
-        System.out.println("Received ACK: " + ack); // Log the ACK
-        return ack;
     }
 
     private byte[] encrypt(byte[] data, int key) {
-        byte[] result = new byte[data.length];
+        byte[] encrypted = new byte[data.length];
         for (int i = 0; i < data.length; i++) {
-            result[i] = (byte) (data[i] ^ key); // XOR encryption
+            encrypted[i] = (byte) (data[i] ^ key);
         }
-        return result;
+        return encrypted;
+    }
+
+    private void sendPacket(OutputStream out, int seqNum, byte[] data) throws IOException {
+        out.write(seqNum);
+        out.write(data);
+    }
+
+    private int receiveAck(Socket socket) throws IOException {
+        return socket.getInputStream().read();
+    }
+
+    private byte[] getPacketData(byte[] fileData, int seqNum) {
+        int packetSize = 1024; // Define packet size
+        int start = seqNum * packetSize;
+
+        if (start >= fileData.length) {
+            return new byte[0]; // No more data to send
+        }
+
+        int end = Math.min(start + packetSize, fileData.length);
+        byte[] packetData = new byte[end - start];
+
+        System.arraycopy(fileData, start, packetData, 0, packetData.length);
+        return packetData;
     }
 }
