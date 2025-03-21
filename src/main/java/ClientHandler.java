@@ -92,6 +92,7 @@ public class ClientHandler implements Runnable {
     }
 
     private void sendFileWithSlidingWindow(OutputStream out, byte[] fileData) throws IOException {
+        int windowSize = 8; // Define window size
         int base = 0; // Start of the window
         int nextSeqNum = 0; // Next sequence number to send
         int totalPackets = (int) Math.ceil((double) fileData.length / 1024); // Total packets
@@ -107,30 +108,19 @@ public class ClientHandler implements Runnable {
 
             // Wait for ACKs for all packets in the window
             int packetsInWindow = Math.min(windowSize, totalPackets - base);
-            boolean[] ackReceived = new boolean[packetsInWindow]; // Track ACKs for each packet
+            int highestAck = base - 1; // Track the highest consecutive ACK received
 
-            while (true) {
+            for (int i = 0; i < packetsInWindow; i++) {
                 int ack = receiveAck(clientSocket);
-                System.out.println("Received ACK: " + ack);
-
-                if (ack >= base && ack < base + packetsInWindow) {
-                    ackReceived[ack - base] = true; // Mark the packet as acknowledged
+                if (ack > highestAck) {
+                    highestAck = ack; // Update the highest consecutive ACK
                 }
+            }
 
-                // Check if all packets in the window have been acknowledged
-                boolean allAcked = true;
-                for (boolean ackStatus : ackReceived) {
-                    if (!ackStatus) {
-                        allAcked = false;
-                        break;
-                    }
-                }
-
-                if (allAcked) {
-                    base += packetsInWindow; // Slide the window forward
-                    System.out.println("Window slid to base: " + base);
-                    break;
-                }
+            // Slide the window forward
+            if (highestAck >= base) {
+                base = highestAck + 1; // Slide the window forward
+                System.out.println("Window slid to base: " + base);
             }
         }
         System.out.println("File transmission complete.");
