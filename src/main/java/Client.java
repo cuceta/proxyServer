@@ -1,23 +1,11 @@
 import java.io.*;
 import java.net.*;
-import java.util.HashMap;
 import java.util.Random;
 
 import static java.lang.System.out;
 
 public class Client {
     public static void main(String[] args) throws IOException {
-        if (args.length < 1) {
-            System.err.println("Usage: java Client <windowSize>");
-            System.exit(1);
-        }
-
-        int windowSize = Integer.parseInt(args[0]); // Read window size from command line
-        if (windowSize != 1 && windowSize != 8 && windowSize != 64) {
-            System.err.println("Invalid window size. Allowed values: 1, 8, 64");
-            System.exit(1);
-        }
-
         Socket socket = new Socket("localhost", 8080); // Connect to proxy server
         InputStream in = socket.getInputStream();
         OutputStream out = socket.getOutputStream();
@@ -69,7 +57,6 @@ public class Client {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int expectedSeqNum = 0; // Expected sequence number
         int totalPackets = Integer.MAX_VALUE; // Unknown total packets initially
-        HashMap<Integer, byte[]> outOfOrderPackets = new HashMap<>(); // Buffer for out-of-order packets
 
         while (expectedSeqNum < totalPackets) {
             try {
@@ -81,7 +68,7 @@ public class Client {
                 dataIn.readFully(packetData); // Read packet data
 
                 // Log the received packet
-                System.out.println("Received packet with seqNum: " + seqNum + ", length: " + packetLength);
+                out.println("Received packet with seqNum: " + seqNum + ", length: " + packetLength);
 
                 // Decrypt packet
                 byte[] decryptedPacket = decrypt(packetData, key);
@@ -94,16 +81,6 @@ public class Client {
                     if (packetLength < 1024) {
                         totalPackets = expectedSeqNum; // Last packet received
                     }
-
-                    // Process buffered out-of-order packets
-                    while (outOfOrderPackets.containsKey(expectedSeqNum)) {
-                        buffer.write(outOfOrderPackets.get(expectedSeqNum));
-                        outOfOrderPackets.remove(expectedSeqNum);
-                        expectedSeqNum++;
-                    }
-                } else {
-                    // Buffer out-of-order packets
-                    outOfOrderPackets.put(seqNum, decryptedPacket);
                 }
 
                 // Send ACK for the received packet
@@ -114,7 +91,7 @@ public class Client {
             }
         }
 
-        System.out.println("File reception complete.");
+        out.println("File reception complete.");
         return buffer.toByteArray();
     }
 
