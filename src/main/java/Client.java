@@ -63,39 +63,50 @@ public class Client {
     private static byte[] receiveFileWithSlidingWindow(InputStream in, int key) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         DataInputStream dataIn = new DataInputStream(in);
+        DataOutputStream dataOut = new DataOutputStream(out);
+
         int expectedSeqNum = 0;
         int totalPackets = Integer.MAX_VALUE;
+        long lastReceivedTime = System.currentTimeMillis();
+        final int CLIENT_TIMEOUT = 5000; // Wait 5 seconds before closing
 
         while (expectedSeqNum < totalPackets) {
             try {
-                int seqNum = dataIn.readInt();
-                int packetLength = dataIn.readInt();
-                byte[] packetData = new byte[packetLength];
-                dataIn.readFully(packetData);
+                if (System.currentTimeMillis() - lastReceivedTime > CLIENT_TIMEOUT) {
+                    System.err.println("Timeout: No more packets received. Closing connection.");
+                    break;
+                }
 
-                out.println("Received packet: SeqNum=" + seqNum + ", Length=" + packetLength);
+                if (dataIn.available() > 0) {
+                    int seqNum = dataIn.readInt();
+                    int packetLength = dataIn.readInt();
+                    byte[] packetData = new byte[packetLength];
+                    dataIn.readFully(packetData);
 
-                byte[] decryptedPacket = decrypt(packetData, key);
+                    System.out.println("Received packet: SeqNum=" + seqNum + ", Length=" + packetLength);
+                    lastReceivedTime = System.currentTimeMillis(); // Reset timeout
 
-                if (seqNum == expectedSeqNum) {
+                    byte[] decryptedPacket = decrypt(packetData, key);
                     buffer.write(decryptedPacket);
+
+                    // Send ACK for received packet
+                    sendAck(dataOut, seqNum);
                     expectedSeqNum++;
 
+                    // If the last packet is smaller than 1024B, assume transfer is complete
                     if (packetLength < 1024) {
                         totalPackets = expectedSeqNum;
                     }
                 }
-
-                sendAck(out, seqNum);
             } catch (EOFException e) {
                 System.err.println("End of stream reached unexpectedly.");
                 break;
             }
         }
 
-        out.println("File reception complete.");
         return buffer.toByteArray();
     }
+
 
     private static void sendAck(OutputStream out, int ack) throws IOException {
         DataOutputStream dataOut = new DataOutputStream(out);
