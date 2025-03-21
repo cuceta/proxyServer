@@ -71,7 +71,15 @@ public class ClientHandler implements Runnable {
             while (nextSeqNum < base + windowSize && nextSeqNum < totalPackets) {
                 byte[] packetData = getPacketData(fileData, nextSeqNum);
                 byte[] encryptedPacket = encrypt(packetData, key);
-                sendPacket(out, nextSeqNum, encryptedPacket);
+
+                try {
+                    sendPacket(out, nextSeqNum, encryptedPacket);
+                    System.out.println("Sent packet with seqNum: " + nextSeqNum);
+                } catch (IOException e) {
+                    System.err.println("Error sending packet: " + e.getMessage());
+                    return;
+                }
+
                 nextSeqNum++;
             }
 
@@ -79,9 +87,13 @@ public class ClientHandler implements Runnable {
             int highestAck = base - 1;
 
             while (System.currentTimeMillis() - startTime < timeout) {
-                if (clientSocket.getInputStream().available() > 0) {
+                try {
                     int ack = receiveAck(clientSocket);
+                    System.out.println("Received ACK: " + ack);
                     if (ack > highestAck) highestAck = ack;
+                } catch (IOException e) {
+                    System.err.println("ACK receive error, possibly client closed connection.");
+                    return;
                 }
             }
 
@@ -93,6 +105,7 @@ public class ClientHandler implements Runnable {
             }
         }
     }
+
 
     private byte[] encrypt(byte[] data, int key) {
         byte[] encrypted = new byte[data.length];
