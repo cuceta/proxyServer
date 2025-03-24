@@ -76,7 +76,7 @@ public class ClientHandler implements Runnable {
 
     private void sendFileWithSlidingWindow(byte[] fileData, DataOutputStream out, DataInputStream in) throws IOException {
         final int CHUNK_SIZE = 1024;  // bytes per packet
-        final int WINDOW_SIZE = 4;      // number of packets in a window
+        final int WINDOW_SIZE = 8;      // number of packets in a window
         final int TIMEOUT = 2000;       // timeout in milliseconds
 
         int totalPackets = (int) Math.ceil(fileData.length / (double) CHUNK_SIZE);
