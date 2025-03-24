@@ -9,7 +9,7 @@ public class Client {
     private static final String PROXY_HOST = "localhost";
     private static final int PROXY_PORT = 8080;
     // Hard-coded URL to request
-    private static final String URL = "http://example.com";
+    private static final String URL = "https://blogs.biomedcentral.com/bmcseriesblog/wp-content/uploads/sites/9/2017/03/ChowChow2Szczecin.jpg";
 
     public static void main(String[] args) {
         try (Socket socket = new Socket(PROXY_HOST, PROXY_PORT);
@@ -45,7 +45,13 @@ public class Client {
     private static void receiveFileWithSlidingWindow(DataInputStream in, DataOutputStream out) throws IOException {
         try (FileOutputStream fileOut = new FileOutputStream("downloaded_file")) {
             while (true) {
-                int seq = in.readInt();
+                int seq;
+                try {
+                    seq = in.readInt();
+                } catch (EOFException e) {
+                    System.out.println("End of stream reached.");
+                    break;
+                }
                 if (seq == -1) {
                     // End of transmission indicator
                     break;
