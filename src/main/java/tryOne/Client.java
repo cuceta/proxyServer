@@ -1,3 +1,5 @@
+package tryOne;
+
 import java.io.*;
 import java.net.*;
 import java.util.Random;
@@ -7,7 +9,7 @@ import static java.lang.System.out;
 public class Client {
     private static final int SERVER_PORT = 8080;
     private static final String SERVER_HOST = "localhost";
-    private static final String FILE_NAME = "received_image.jpg";
+    private static final String FILE_NAME = "tryOne/received_image.jpg";
 
     public static void main(String[] args) {
         try (Socket socket = new Socket(SERVER_HOST, SERVER_PORT);
