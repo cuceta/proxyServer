@@ -7,9 +7,7 @@ public class Client {
     private static final String PROXY_HOST = "localhost";
     private static final int PROXY_PORT = 8080;
     // Hard-coded URL
-    private static final String URL = "https://www.reddit.com/r/aww/comments/r0rk0e/arent_chow_chow_puppies_so_cute/#lightbox";
-    
-
+    private static final String URL = "https://blogs.biomedcentral.com/bmcseriesblog/wp-content/uploads/sites/9/2017/03/ChowChow2Szczecin.jpg";
     public static void main(String[] args) {
         try (Socket socket = new Socket(PROXY_HOST, PROXY_PORT);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
