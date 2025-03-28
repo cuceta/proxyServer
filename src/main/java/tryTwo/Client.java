@@ -7,8 +7,12 @@ import java.util.Random;
 public class Client {
     private static final String PROXY_HOST = "localhost";
     private static final int PROXY_PORT = 8080;
-    // Hard-coded URL to request
+
+    // CHOW CHOW IMAGE
     private static final String URL = "https://blogs.biomedcentral.com/bmcseriesblog/wp-content/uploads/sites/9/2017/03/ChowChow2Szczecin.jpg";
+
+    // FLOWERS IMAGE
+//    private static final String URL = "https://images.contentstack.io/v3/assets/bltcedd8dbd5891265b/blt682575f35cf2888d/6668cee126c2a688bd1aa8b1/Birthday-Flowers-Colors.jpg?q=70&width=1200&auto=webp.jpg";
 
     public static void main(String[] args) {
         try (Socket socket = new Socket(PROXY_HOST, PROXY_PORT);
