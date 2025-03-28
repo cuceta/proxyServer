@@ -20,18 +20,15 @@ public class ClientHandler implements Runnable {
              DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
 
             // --- Encryption Key Exchange ---
-            // Client sends its ID and a random number
             int clientID = in.readInt();
             int clientRandom = in.readInt();
 
-            // Server generates its own ID and random number and sends them
             int serverID = new Random().nextInt(1000);
             int serverRandom = new Random().nextInt(1000);
             out.writeInt(serverID);
             out.writeInt(serverRandom);
             out.flush();
 
-            // Both sides compute the encryption key (here, simply XOR the random numbers)
             int encryptionKey = clientRandom ^ serverRandom;
             System.out.println("Encryption Key Established: " + encryptionKey);
 
@@ -47,6 +44,8 @@ public class ClientHandler implements Runnable {
                 System.out.println("Fetching data for: " + url);
                 fileData = fetchFromServer(url);
                 cache.put(url, fileData);
+                // Save the fetched file to /tmp with the URL as the file name.
+                saveFileToTmp(fileData, url);
             }
 
             // --- Send File Using TFTP-like Protocol (Sliding Window, RTO) ---
@@ -67,16 +66,34 @@ public class ClientHandler implements Runnable {
 
             byte[] data = new byte[4096];
             int bytesRead;
-            while ((bytesRead = inputStream.read(data)) != -1) {
+            while ((bytesRead = inputStream.read(data, 0, data.length)) != -1) {
                 buffer.write(data, 0, bytesRead);
             }
             return buffer.toByteArray();
         }
     }
 
+    private void saveFileToTmp(byte[] fileData, String url) {
+        String fileName = sanitizeFileName(url);
+        File file = new File("/tmp", fileName);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(fileData);
+            System.out.println("Saved file to " + file.getAbsolutePath());
+        } catch (IOException e) {
+            System.out.println("Error saving file: " + e.getMessage());
+        }
+    }
+
+    private static String sanitizeFileName(String url) {
+        // Remove protocol part and replace non-alphanumeric characters with underscores
+        String sanitized = url.replaceAll("https?://", "");
+        sanitized = sanitized.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+        return sanitized;
+    }
+
     private void sendFileWithSlidingWindow(byte[] fileData, DataOutputStream out, DataInputStream in) throws IOException {
         final int CHUNK_SIZE = 1024;  // bytes per packet
-        final int WINDOW_SIZE = 8;      // number of packets in a window
+        final int WINDOW_SIZE = 4;      // number of packets in a window
         final int TIMEOUT = 2000;       // timeout in milliseconds
 
         int totalPackets = (int) Math.ceil(fileData.length / (double) CHUNK_SIZE);
