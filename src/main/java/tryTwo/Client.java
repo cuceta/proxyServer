@@ -1,5 +1,4 @@
 package tryTwo;
-
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -9,7 +8,7 @@ public class Client {
     private static final String PROXY_HOST = "localhost";
     private static final int PROXY_PORT = 8080;
     // Hard-coded URL to request
-    private static final String URL = "https://blogs.biomedcentral.com/bmcseriesblog/wp-content/uploads/sites/9/2017/03/ChowChow2Szczecin.jpg";
+    private static final String URL = "http://example.com";
 
     public static void main(String[] args) {
         try (Socket socket = new Socket(PROXY_HOST, PROXY_PORT);
@@ -32,8 +31,12 @@ public class Client {
             out.writeUTF(URL);
             out.flush();
 
+            // Determine file name based on URL
+            String fileName = sanitizeFileName(URL);
+            System.out.println("Saving downloaded file as: " + fileName);
+
             // --- Receive the File Using the Sliding Window Protocol ---
-            receiveFileWithSlidingWindow(in, out);
+            receiveFileWithSlidingWindow(in, out, fileName);
 
             System.out.println("File downloaded successfully.");
 
@@ -42,8 +45,8 @@ public class Client {
         }
     }
 
-    private static void receiveFileWithSlidingWindow(DataInputStream in, DataOutputStream out) throws IOException {
-        try (FileOutputStream fileOut = new FileOutputStream("downloaded_file")) {
+    private static void receiveFileWithSlidingWindow(DataInputStream in, DataOutputStream out, String fileName) throws IOException {
+        try (FileOutputStream fileOut = new FileOutputStream(fileName)) {
             while (true) {
                 int seq;
                 try {
@@ -68,5 +71,11 @@ public class Client {
             }
         }
     }
-}
 
+    private static String sanitizeFileName(String url) {
+        // Remove protocol part and replace non-alphanumeric characters with underscores
+        String sanitized = url.replaceAll("https?://", "");
+        sanitized = sanitized.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+        return sanitized;
+    }
+}
