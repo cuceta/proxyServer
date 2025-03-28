@@ -14,6 +14,7 @@ public class Client {
     // FLOWERS IMAGE
     private static final String URL = "https://images.contentstack.io/v3/assets/bltcedd8dbd5891265b/blt682575f35cf2888d/6668cee126c2a688bd1aa8b1/Birthday-Flowers-Colors.jpg?q=70&width=1200&auto=webp.jpg";
 
+    //BEACH
     public static void main(String[] args) {
         try (Socket socket = new Socket(PROXY_HOST, PROXY_PORT);
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
