@@ -9,10 +9,10 @@ public class Client {
     private static final int PROXY_PORT = 8080;
 
     // CHOW CHOW IMAGE
-//    private static final String URL = "https://blogs.biomedcentral.com/bmcseriesblog/wp-content/uploads/sites/9/2017/03/ChowChow2Szczecin.jpg";
+    private static final String URL = "https://blogs.biomedcentral.com/bmcseriesblog/wp-content/uploads/sites/9/2017/03/ChowChow2Szczecin.jpg";
 
     // FLOWERS IMAGE
-    private static final String URL = "https://images.contentstack.io/v3/assets/bltcedd8dbd5891265b/blt682575f35cf2888d/6668cee126c2a688bd1aa8b1/Birthday-Flowers-Colors.jpg?q=70&width=1200&auto=webp.jpg";
+//    private static final String URL = "https://images.contentstack.io/v3/assets/bltcedd8dbd5891265b/blt682575f35cf2888d/6668cee126c2a688bd1aa8b1/Birthday-Flowers-Colors.jpg?q=70&width=1200&auto=webp.jpg";
 
     //BEACH
 //    private static final String URL = "https://www.celebritycruises.com/blog/content/uploads/2021/07/best-beaches-in-dominican-republic-playa-la-ensenada-1600x890.jpg";
