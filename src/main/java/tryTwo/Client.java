@@ -53,7 +53,13 @@ public class Client {
     }
 
     private static void receiveFileWithSlidingWindow(DataInputStream in, DataOutputStream out, String fileName) throws IOException {
-        try (FileOutputStream fileOut = new FileOutputStream(fileName)) {
+        // Create /temp directory if it does not exist
+        File tempDir = new File("/temp");
+        if (!tempDir.exists()) {
+            tempDir.mkdirs();
+        }
+        File outputFile = new File(tempDir, fileName);
+        try (FileOutputStream fileOut = new FileOutputStream(outputFile)) {
             while (true) {
                 int seq;
                 try {
