@@ -54,6 +54,7 @@ public class Client {
     }
 
     private static void receiveFileWithSlidingWindow(DataInputStream in, DataOutputStream out, String fileName) throws IOException {
+        // Use relative "temp" directory instead of "/temp"
         File tempDir = new File("temp");
         if (!tempDir.exists()) {
             tempDir.mkdirs();
