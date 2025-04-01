@@ -49,7 +49,7 @@ public class Client {
             out.flush();
 
             // Determine file name based on URL.
-            String fileName = "drop_"+drop+"_"+sanitizeFileName(URL);
+            String fileName = "drop_"+drop+"_"+windowSize+"_"+sanitizeFileName(URL);
             System.out.println("Saving downloaded file as: " + fileName);
 
             // --- Measure Throughput ---
@@ -58,7 +58,7 @@ public class Client {
             long endTime = System.nanoTime();
 
             // Calculate file size and throughput in Mbps.
-            File downloadedFile = new File("temp", fileName);
+            File downloadedFile = new File(host_to_server+ File.separator +"temp", fileName);
             long fileSizeBytes = downloadedFile.length();
             double elapsedSeconds = (endTime - startTime) / 1e9;
             // Convert file size to bits and then calculate Mbps.
@@ -74,7 +74,7 @@ public class Client {
 
             // --- File Integrity Validation using cmp ---
             String downloadedFilePath = "temp" + File.separator + fileName;
-            String referenceFilePath = "reference" + File.separator + fileName;
+            String referenceFilePath = "reference" + File.separator + sanitizeFileName(URL);
             validateFileIntegrity(downloadedFilePath, referenceFilePath);
 
         } catch (IOException | InterruptedException e) {
@@ -85,7 +85,7 @@ public class Client {
     private static void receiveFileWithSlidingWindow(DataInputStream in, DataOutputStream out, String fileName)
             throws IOException {
         // Create relative "temp" directory if it does not exist.
-        File tempDir = new File("temp");
+        File tempDir = new File(host_to_server + File.separator+"temp");
         if (!tempDir.exists()) {
             tempDir.mkdirs();
         }
@@ -146,7 +146,7 @@ public class Client {
 
     private static void generateReport(long fileSize, double elapsedSeconds, double throughputMbps)
             throws IOException {
-        File resultDir = new File(host_to_server);
+        File resultDir = new File(host_to_server+ File.separator +"htmlFiles");
         if (!resultDir.exists()) {
             resultDir.mkdirs();
         }
