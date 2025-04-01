@@ -45,7 +45,6 @@ public class ClientHandler implements Runnable {
                 System.out.println("Fetching data for: " + url);
                 fileData = fetchFromServer(url);
                 cache.put(url, fileData);
-                // Optionally save the file to /tmp
                 saveFileToTmp(fileData, url);
             }
 
