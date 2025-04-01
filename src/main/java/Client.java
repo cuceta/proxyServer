@@ -48,13 +48,14 @@ public class Client {
             out.writeUTF(URL);
             out.flush();
 
+
             // Determine file name based on URL.
             String fileName = "drop_"+drop+"_"+windowSize+"_"+sanitizeFileName(URL);
             System.out.println("Saving downloaded file as: " + fileName);
 
             // --- Measure Throughput ---
             long startTime = System.nanoTime();
-            receiveFileWithSlidingWindow(in, out, fileName);
+            receiveFileWithSlidingWindow(in, out, fileName, encryptionKey);
             long endTime = System.nanoTime();
 
             // Calculate file size and throughput in Mbps.
@@ -82,10 +83,9 @@ public class Client {
         }
     }
 
-    private static void receiveFileWithSlidingWindow(DataInputStream in, DataOutputStream out, String fileName)
+    private static void receiveFileWithSlidingWindow(DataInputStream in, DataOutputStream out, String fileName, long key)
             throws IOException {
-        // Create relative "temp" directory if it does not exist.
-        File tempDir = new File(host_to_server + File.separator+"temp");
+        File tempDir = new File(host_to_server + File.separator + "temp");
         if (!tempDir.exists()) {
             tempDir.mkdirs();
         }
@@ -99,21 +99,24 @@ public class Client {
                     System.out.println("End of stream reached.");
                     break;
                 }
-                if (seq == -1) {  // End-of-transmission indicator.
+                if (seq == -1) {  // Termination packet.
                     break;
                 }
                 int length = in.readInt();
-                byte[] buffer = new byte[length];
-                in.readFully(buffer);
+                byte[] encryptedBuffer = new byte[length];
+                in.readFully(encryptedBuffer);
+                // Decrypt the received data.
+                byte[] buffer = Encryption.encryptDecrypt(encryptedBuffer, key);
                 fileOut.write(buffer);
                 fileOut.flush();
-                // Send acknowledgment for the received packet.
+                // Send acknowledgment.
                 out.writeInt(seq);
                 out.flush();
                 System.out.println("Sent ACK for packet: " + seq);
             }
         }
     }
+
 
     private static String sanitizeFileName(String url) {
         // Remove the protocol part and replace non-alphanumeric characters with underscores.

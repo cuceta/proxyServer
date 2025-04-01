@@ -10,6 +10,9 @@ public class ClientHandler implements Runnable {
     private boolean simulateDrop;
     private int windowSize;
 
+    int clientRandom;
+    int serverRandom;
+
     // Updated constructor to accept the windowSize parameter.
     public ClientHandler(Socket clientSocket, boolean simulateDrop, int windowSize) {
         this.clientSocket = clientSocket;
@@ -24,10 +27,10 @@ public class ClientHandler implements Runnable {
 
             // --- Encryption Key Exchange ---
             int clientID = in.readInt();
-            int clientRandom = in.readInt();
+            clientRandom = in.readInt();
 
             int serverID = new Random().nextInt(1000);
-            int serverRandom = new Random().nextInt(1000);
+            serverRandom = new Random().nextInt(1000);
             out.writeInt(serverID);
             out.writeInt(serverRandom);
             out.flush();
@@ -93,35 +96,40 @@ public class ClientHandler implements Runnable {
     }
 
     private void sendFileWithSlidingWindow(byte[] fileData, DataOutputStream out, DataInputStream in) throws IOException {
-        final int CHUNK_SIZE = 1024;  // bytes per packet
-        // Use the provided windowSize instead of a fixed constant.
+        final int CHUNK_SIZE = 1024;
         final int WINDOW_SIZE = this.windowSize;
-        final int TIMEOUT = 2000;       // timeout in milliseconds
+        final int TIMEOUT = 2000; // milliseconds
 
         int totalPackets = (int) Math.ceil(fileData.length / (double) CHUNK_SIZE);
         boolean[] acked = new boolean[totalPackets];
         int base = 0;
 
-        // Set a socket timeout for reading acknowledgments.
+        long key = (long) (clientRandom ^ serverRandom);
+
         clientSocket.setSoTimeout(TIMEOUT);
 
         while (base < totalPackets) {
             int windowEnd = Math.min(base + WINDOW_SIZE, totalPackets);
 
-            // Send all packets in the window that have not yet been acknowledged.
+            // Send all packets in the window that haven't been acknowledged.
             for (int seq = base; seq < windowEnd; seq++) {
                 if (!acked[seq]) {
-                    // Simulate dropping 1% of the packets if enabled.
+                    // Optional: simulate packet drop
                     if (simulateDrop && Math.random() < 0.01) {
                         System.out.println("Simulating drop of packet: " + seq);
-                        continue; // Skip sending this packet.
+                        continue;
                     }
                     int start = seq * CHUNK_SIZE;
                     int length = Math.min(CHUNK_SIZE, fileData.length - start);
-                    // Send packet header: sequence number and length.
+                    // Get the current chunk
+                    byte[] chunk = new byte[length];
+                    System.arraycopy(fileData, start, chunk, 0, length);
+                    // Encrypt the chunk
+                    byte[] encryptedChunk = Encryption.encryptDecrypt(chunk, key);
+                    // Send packet header: sequence number and length, then the encrypted data.
                     out.writeInt(seq);
-                    out.writeInt(length);
-                    out.write(fileData, start, length);
+                    out.writeInt(encryptedChunk.length);
+                    out.write(encryptedChunk);
                     out.flush();
                     System.out.println("Sent packet: " + seq);
                 }
@@ -150,15 +158,15 @@ public class ClientHandler implements Runnable {
                     break;
                 }
             }
-            // Slide the window forward past any acknowledged packets.
+            // Slide the window forward.
             while (base < totalPackets && acked[base]) {
                 base++;
             }
         }
-
-        // Send a termination packet (sequence number -1).
+        // Send termination packet.
         out.writeInt(-1);
         out.flush();
         System.out.println("File transmission complete.");
     }
+
 }
