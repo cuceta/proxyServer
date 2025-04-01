@@ -9,7 +9,7 @@ public class Client {
     private static final int PROXY_PORT = 8080;
 
     // CHOW CHOW IMAGE
-    private static final String URL = "https://blogs.biomedcentral.com/bmcseriesblog/wp-content/uploads/sites/9/2017/03/ChowChow2Szczecin.jpg";
+//    private static final String URL = "https://blogs.biomedcentral.com/bmcseriesblog/wp-content/uploads/sites/9/2017/03/ChowChow2Szczecin.jpg";
 
     // FLOWERS IMAGE
 //    private static final String URL = "https://images.contentstack.io/v3/assets/bltcedd8dbd5891265b/blt682575f35cf2888d/6668cee126c2a688bd1aa8b1/Birthday-Flowers-Colors.jpg?q=70&width=1200&auto=webp.jpg";
@@ -17,6 +17,8 @@ public class Client {
     //BEACH
 //    private static final String URL = "https://www.celebritycruises.com/blog/content/uploads/2021/07/best-beaches-in-dominican-republic-playa-la-ensenada-1600x890.jpg";
 
+    //ICE CREAM
+    private static final String URL = "https://www.browneyedbaker.com/wp-content/uploads/2021/05/rocky-road-ice-cream-13-square.jpg";
     public static void main(String[] args) {
         try (Socket socket = new Socket(PROXY_HOST, PROXY_PORT);
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -42,9 +44,25 @@ public class Client {
             String fileName = sanitizeFileName(URL);
             System.out.println("Saving downloaded file as: " + fileName);
 
-            // --- Receive the File Using the Sliding Window Protocol ---
+            // --- Measure Throughput ---
+            long startTime = System.nanoTime();
             receiveFileWithSlidingWindow(in, out, fileName);
-            System.out.println("File downloaded successfully.");
+            long endTime = System.nanoTime();
+
+            // Calculate file size and throughput in Mbps.
+            File downloadedFile = new File("temp", fileName);
+            long fileSizeBytes = downloadedFile.length();
+            double elapsedSeconds = (endTime - startTime) / 1e9;
+            // Convert file size to bits and then calculate Mbps.
+            double throughputBps = (fileSizeBytes * 8) / elapsedSeconds;
+            double throughputMbps = throughputBps / 1e6;
+
+            System.out.println("File Size (bytes): " + fileSizeBytes);
+            System.out.println("Elapsed Time (seconds): " + elapsedSeconds);
+            System.out.println("Throughput (Mbps): " + throughputMbps);
+
+            // Generate an HTML report with throughput information.
+            generateReport(fileSizeBytes, elapsedSeconds, throughputMbps);
 
             // --- File Integrity Validation using cmp ---
             String downloadedFilePath = "temp" + File.separator + fileName;
@@ -58,6 +76,7 @@ public class Client {
 
     private static void receiveFileWithSlidingWindow(DataInputStream in, DataOutputStream out, String fileName)
             throws IOException {
+        // Create relative "temp" directory if it does not exist.
         File tempDir = new File("temp");
         if (!tempDir.exists()) {
             tempDir.mkdirs();
@@ -97,7 +116,7 @@ public class Client {
 
     private static void validateFileIntegrity(String downloadedFilePath, String referenceFilePath)
             throws IOException, InterruptedException {
-        // Build the cmp command. Example: cmp temp/somefile.jpg reference/somefile.jpg
+        // Build the cmp command.
         String command = "cmp " + downloadedFilePath + " " + referenceFilePath;
         System.out.println("Validating file integrity with command: " + command);
         Process process = Runtime.getRuntime().exec(command);
@@ -115,5 +134,20 @@ public class Client {
                 }
             }
         }
+    }
+
+    private static void generateReport(long fileSize, double elapsedSeconds, double throughputMbps)
+            throws IOException {
+        String htmlContent = "<html><head><title>Throughput Report</title></head><body>" +
+                "<h1>Throughput Report</h1>" +
+                "<p>File Size: " + fileSize + " bytes</p>" +
+                "<p>Elapsed Time: " + String.format("%.3f", elapsedSeconds) + " seconds</p>" +
+                "<p>Throughput: " + String.format("%.3f", throughputMbps) + " Mbps</p>" +
+                "</body></html>";
+
+        try (FileWriter writer = new FileWriter("throughput.html")) {
+            writer.write(htmlContent);
+        }
+        System.out.println("Throughput report generated: throughput.html");
     }
 }
