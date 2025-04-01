@@ -73,7 +73,7 @@ public class Client {
             generateReport(fileSizeBytes, elapsedSeconds, throughputMbps);
 
             // --- File Integrity Validation using cmp ---
-            String downloadedFilePath = "temp" + File.separator + fileName;
+            String downloadedFilePath = host_to_server + File.separator+"temp" + File.separator + fileName;
             String referenceFilePath = "reference" + File.separator + sanitizeFileName(URL);
             validateFileIntegrity(downloadedFilePath, referenceFilePath);
 
