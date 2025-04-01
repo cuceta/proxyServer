@@ -20,8 +20,8 @@ public class Client {
     //ICE CREAM
     private static final String URL = "https://www.browneyedbaker.com/wp-content/uploads/2021/05/rocky-road-ice-cream-13-square.jpg";
 
-    private static final String drop = "drop";
-    private static final String windowSize = "64";
+    private static final String drop = "enabled";
+    private static final String windowSize = "1";
     private static final String host_to_server = "local-local";
     public static void main(String[] args) {
         try (Socket socket = new Socket(PROXY_HOST, PROXY_PORT);
@@ -146,12 +146,12 @@ public class Client {
         if (!resultDir.exists()) {
             resultDir.mkdirs();
         }
-        String htmlFileName = host_to_server+drop+windowSize+"throughput.html";
+        String htmlFileName = "drop_"+drop+"_"+windowSize+"_throughput.html";
         String htmlContent =
-                "<h1>Throughput Report for simulation with " + drop+ " simulation and a " + windowSize + " window size.</h1>" +
-                "<p>File Size: " + fileSize + " bytes</p>" +
-                "<p>Elapsed Time: " + String.format("%.3f", elapsedSeconds) + " seconds</p>"+
-                "<p>Throughput: " + throughputMbps + " Mbps</p>";
+                "<h1>Throughput Report for simulation with " + drop+ " drop simulation and a " + windowSize + " window size.</h1>\n" +
+                "<p>File Size: " + fileSize + " bytes</p>\n" +
+                "<p>Elapsed Time: " + String.format("%.3f", elapsedSeconds) + " seconds</p>\n"+
+                "<p>Throughput: " + throughputMbps + " Mbps</p>\n";
 
         File outputFile = new File(resultDir, htmlFileName);
 
