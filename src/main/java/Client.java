@@ -49,7 +49,7 @@ public class Client {
             out.flush();
 
             // Determine file name based on URL.
-            String fileName = sanitizeFileName(URL);
+            String fileName = "drop_"+drop+"_"+sanitizeFileName(URL);
             System.out.println("Saving downloaded file as: " + fileName);
 
             // --- Measure Throughput ---
