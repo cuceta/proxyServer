@@ -19,6 +19,10 @@ public class Client {
 
     //ICE CREAM
     private static final String URL = "https://www.browneyedbaker.com/wp-content/uploads/2021/05/rocky-road-ice-cream-13-square.jpg";
+
+    private static final String drop = "drop";
+    private static final String windowSize = "64";
+    private static final String host_to_server = "local-local";
     public static void main(String[] args) {
         try (Socket socket = new Socket(PROXY_HOST, PROXY_PORT);
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -138,16 +142,17 @@ public class Client {
 
     private static void generateReport(long fileSize, double elapsedSeconds, double throughputMbps)
             throws IOException {
-        String htmlContent = "<html><head><title>Throughput Report</title></head><body>" +
-                "<h1>Throughput Report</h1>" +
+        String htmlFileName = host_to_server+drop+windowSize+"throughput.html";
+        String htmlContent =
+                "<h1>Throughput Report for simulation with " + drop+ "simulation and a " + windowSize + " window size.</h1>" +
                 "<p>File Size: " + fileSize + " bytes</p>" +
-                "<p>Elapsed Time: " + String.format("%.3f", elapsedSeconds) + " seconds</p>" +
-                "<p>Throughput: " + String.format("%.3f", throughputMbps) + " Mbps</p>" +
-                "</body></html>";
+                "<p>Elapsed Time: " + String.format("%.3f", elapsedSeconds) + " seconds</p>"+
+                "<p>Throughput: " + throughputMbps + " Mbps</p>";
 
-        try (FileWriter writer = new FileWriter("throughput.html")) {
+
+        try (FileWriter writer = new FileWriter(htmlFileName)) {
             writer.write(htmlContent);
         }
-        System.out.println("Throughput report generated: throughput.html");
+        System.out.println("Throughput report generated: " + htmlFileName);
     }
 }
