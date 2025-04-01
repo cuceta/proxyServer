@@ -142,17 +142,23 @@ public class Client {
 
     private static void generateReport(long fileSize, double elapsedSeconds, double throughputMbps)
             throws IOException {
+        File resultDir = new File(host_to_server);
+        if (!resultDir.exists()) {
+            resultDir.mkdirs();
+        }
         String htmlFileName = host_to_server+drop+windowSize+"throughput.html";
         String htmlContent =
-                "<h1>Throughput Report for simulation with " + drop+ "simulation and a " + windowSize + " window size.</h1>" +
+                "<h1>Throughput Report for simulation with " + drop+ " simulation and a " + windowSize + " window size.</h1>" +
                 "<p>File Size: " + fileSize + " bytes</p>" +
                 "<p>Elapsed Time: " + String.format("%.3f", elapsedSeconds) + " seconds</p>"+
                 "<p>Throughput: " + throughputMbps + " Mbps</p>";
 
+        File outputFile = new File(resultDir, htmlFileName);
 
-        try (FileWriter writer = new FileWriter(htmlFileName)) {
+        try (FileWriter writer = new FileWriter(outputFile)) {
             writer.write(htmlContent);
         }
+
         System.out.println("Throughput report generated: " + htmlFileName);
     }
 }
