@@ -23,7 +23,7 @@ public class Client {
              DataInputStream in = new DataInputStream(socket.getInputStream())) {
 
             // --- Encryption Key Exchange ---
-            int clientID = 123;  // Arbitrary client ID
+            int clientID = 123;  // Arbitrary client ID.
             int clientRandom = new Random().nextInt(1000);
             out.writeInt(clientID);
             out.writeInt(clientRandom);
@@ -34,26 +34,30 @@ public class Client {
             int encryptionKey = clientRandom ^ serverRandom;
             System.out.println("Encryption Key Established: " + encryptionKey);
 
-            // --- Send the URL ---
+            // --- Send the URL (hard-coded) ---
             out.writeUTF(URL);
             out.flush();
 
-            // Determine file name based on URL
+            // Determine file name based on URL.
             String fileName = sanitizeFileName(URL);
             System.out.println("Saving downloaded file as: " + fileName);
 
             // --- Receive the File Using the Sliding Window Protocol ---
             receiveFileWithSlidingWindow(in, out, fileName);
-
             System.out.println("File downloaded successfully.");
 
-        } catch (IOException e) {
+            // --- File Integrity Validation using cmp ---
+            String downloadedFilePath = "temp" + File.separator + fileName;
+            String referenceFilePath = "reference" + File.separator + fileName;
+            validateFileIntegrity(downloadedFilePath, referenceFilePath);
+
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    private static void receiveFileWithSlidingWindow(DataInputStream in, DataOutputStream out, String fileName) throws IOException {
-        // Use relative "temp" directory instead of "/temp"
+    private static void receiveFileWithSlidingWindow(DataInputStream in, DataOutputStream out, String fileName)
+            throws IOException {
         File tempDir = new File("temp");
         if (!tempDir.exists()) {
             tempDir.mkdirs();
@@ -68,8 +72,7 @@ public class Client {
                     System.out.println("End of stream reached.");
                     break;
                 }
-                if (seq == -1) {
-                    // End of transmission indicator
+                if (seq == -1) {  // End-of-transmission indicator.
                     break;
                 }
                 int length = in.readInt();
@@ -77,7 +80,7 @@ public class Client {
                 in.readFully(buffer);
                 fileOut.write(buffer);
                 fileOut.flush();
-                // Send acknowledgment for the received packet
+                // Send acknowledgment for the received packet.
                 out.writeInt(seq);
                 out.flush();
                 System.out.println("Sent ACK for packet: " + seq);
@@ -86,9 +89,31 @@ public class Client {
     }
 
     private static String sanitizeFileName(String url) {
-        // Remove protocol part and replace non-alphanumeric characters with underscores
+        // Remove the protocol part and replace non-alphanumeric characters with underscores.
         String sanitized = url.replaceAll("https?://", "");
         sanitized = sanitized.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
         return sanitized;
+    }
+
+    private static void validateFileIntegrity(String downloadedFilePath, String referenceFilePath)
+            throws IOException, InterruptedException {
+        // Build the cmp command. Example: cmp temp/somefile.jpg reference/somefile.jpg
+        String command = "cmp " + downloadedFilePath + " " + referenceFilePath;
+        System.out.println("Validating file integrity with command: " + command);
+        Process process = Runtime.getRuntime().exec(command);
+        int exitCode = process.waitFor();
+
+        if (exitCode == 0) {
+            System.out.println("File integrity validated: files match.");
+        } else {
+            System.out.println("File integrity check failed: files differ.");
+            try (BufferedReader errorReader = new BufferedReader(
+                    new InputStreamReader(process.getErrorStream()))) {
+                String line;
+                while ((line = errorReader.readLine()) != null) {
+                    System.out.println(line);
+                }
+            }
+        }
     }
 }
