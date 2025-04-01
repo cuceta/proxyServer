@@ -118,7 +118,7 @@ public class Client {
     private static String sanitizeFileName(String url) {
         // Remove the protocol part and replace non-alphanumeric characters with underscores.
         String sanitized = url.replaceAll("https?://", "");
-        sanitized = sanitized.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+        sanitized = sanitized.replaceAll("[^a-zA-Z0-9\\.\\-&]", "_");
         return sanitized;
     }
 
