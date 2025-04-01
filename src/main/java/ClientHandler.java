@@ -1,4 +1,3 @@
-package tryTwo;
 import java.io.*;
 import java.net.*;
 import java.util.HashMap;
@@ -9,10 +8,13 @@ public class ClientHandler implements Runnable {
     private static final Map<String, byte[]> cache = new HashMap<>();
     private Socket clientSocket;
     private boolean simulateDrop;
+    private int windowSize;
 
-    public ClientHandler(Socket clientSocket, boolean simulateDrop) {
+    // Updated constructor to accept the windowSize parameter.
+    public ClientHandler(Socket clientSocket, boolean simulateDrop, int windowSize) {
         this.clientSocket = clientSocket;
         this.simulateDrop = simulateDrop;
+        this.windowSize = windowSize;
     }
 
     @Override
@@ -92,7 +94,8 @@ public class ClientHandler implements Runnable {
 
     private void sendFileWithSlidingWindow(byte[] fileData, DataOutputStream out, DataInputStream in) throws IOException {
         final int CHUNK_SIZE = 1024;  // bytes per packet
-        final int WINDOW_SIZE = 1;      // number of packets in a window
+        // Use the provided windowSize instead of a fixed constant.
+        final int WINDOW_SIZE = this.windowSize;
         final int TIMEOUT = 2000;       // timeout in milliseconds
 
         int totalPackets = (int) Math.ceil(fileData.length / (double) CHUNK_SIZE);
