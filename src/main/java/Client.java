@@ -6,22 +6,24 @@ public class Client {
     private static final String PROXY_HOST = "localhost";
     private static final int PROXY_PORT = 8080;
 
-    // CHOW CHOW IMAGE
-//    private static final String URL = "https://blogs.biomedcentral.com/bmcseriesblog/wp-content/uploads/sites/9/2017/03/ChowChow2Szczecin.jpg";
+    // These fields will be initialized from command-line arguments.
+    private static String URL;
+    private static String windowSize;
+    private static String drop;
+    private static String host_to_server;
 
-    // FLOWERS IMAGE
-//    private static final String URL = "https://images.contentstack.io/v3/assets/bltcedd8dbd5891265b/blt682575f35cf2888d/6668cee126c2a688bd1aa8b1/Birthday-Flowers-Colors.jpg?q=70&width=1200&auto=webp.jpg";
-
-    //BEACH
-//    private static final String URL = "https://www.celebritycruises.com/blog/content/uploads/2021/07/best-beaches-in-dominican-republic-playa-la-ensenada-1600x890.jpg";
-
-    //ICE CREAM
-    private static final String URL = "https://www.browneyedbaker.com/wp-content/uploads/2021/05/rocky-road-ice-cream-13-square.jpg";
-
-    private static final String drop = "enabled";
-    private static final String windowSize = "1";
-    private static final String host_to_server = "local-local";
     public static void main(String[] args) {
+        // Expect four command-line arguments: URL, window size, drop, host_to_server.
+        if (args.length < 4) {
+            System.out.println("Usage: java Client <URL> <windowSize> <drop> <host_to_server>");
+            System.exit(1);
+        }
+
+        URL = args[0];
+        windowSize = args[1];
+        drop = args[2];
+        host_to_server = args[3];
+
         try (Socket socket = new Socket(PROXY_HOST, PROXY_PORT);
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
              DataInputStream in = new DataInputStream(socket.getInputStream())) {
@@ -38,7 +40,7 @@ public class Client {
             int encryptionKey = clientRandom ^ serverRandom;
             System.out.println("Encryption Key Established: " + encryptionKey);
 
-            // --- Send the URL (hard-coded) ---
+            // --- Send the URL (from command-line argument) ---
             out.writeUTF(URL);
             out.flush();
 
@@ -144,12 +146,12 @@ public class Client {
         if (!resultDir.exists()) {
             resultDir.mkdirs();
         }
-        String htmlFileName = "drop_"+drop+"_"+windowSize+"_throughput.html";
+        String htmlFileName = "drop_" + drop + "_" + windowSize + "_throughput.html";
         String htmlContent =
-                "<h1>Throughput Report for simulation with " + drop+ " drop simulation and a " + windowSize + " window size.</h1>\n" +
-                "<p>File Size: " + fileSize + " bytes</p>\n" +
-                "<p>Elapsed Time: " + String.format("%.3f", elapsedSeconds) + " seconds</p>\n"+
-                "<p>Throughput: " + throughputMbps + " Mbps</p>\n";
+                "<h1>Throughput Report for simulation with " + drop + " drop simulation and a " + windowSize + " window size.</h1>\n" +
+                        "<p>File Size: " + fileSize + " bytes</p>\n" +
+                        "<p>Elapsed Time: " + String.format("%.3f", elapsedSeconds) + " seconds</p>\n" +
+                        "<p>Throughput: " + throughputMbps + " Mbps</p>\n";
 
         File outputFile = new File(resultDir, htmlFileName);
 
