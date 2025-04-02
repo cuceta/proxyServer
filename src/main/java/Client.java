@@ -149,18 +149,27 @@ public class Client {
 
     private static void generateReport(long fileSize, double elapsedSeconds, double throughputMbps, File downloadedFile)
             throws IOException {
-        File resultDir = new File(host_to_server+ File.separator +"htmlFiles");
+        File resultDir = new File(host_to_server + File.separator + "htmlFiles");
         if (!resultDir.exists()) {
             resultDir.mkdirs();
         }
-        String htmlFileName = "drop_"+drop+"_"+windowSize+"_throughput.html";
+        String htmlFileName = "drop_" + drop + "_" + windowSize + "_throughput.html";
         String htmlContent =
-                "<h1>Throughput Report for simulation with " + drop+ " drop simulation and a " + windowSize + " window size.</h1>\n" +
-                "<div> \n<p>File Size: " + fileSize + " bytes</p>\n" +
-                "<p>Elapsed Time: " + String.format("%.3f", elapsedSeconds) + " seconds</p>\n"+
-                "<p>Throughput: " + throughputMbps + " Mbps</p>\n</div>\n" +
-                "<div> \n <img src='" + downloadedFile + "'/> \n </div>"
+                "<div style='padding: 25px 50px;'> \n " +
+                        "<h1>Throughput Report for simulation with " + drop + " drop simulation and a " + windowSize + " window size.</h1> \n" +
+                        "<div style='display: flex; flex-wrap: wrap;'> \n" +
+                        "<div style='flex: 0 0 40%;'> \n" +
+                        "<img src='" + downloadedFile + "' style='width: 100%; height: auto;'/> \n" +
+                        "</div> \n" +
+                        "<div style='flex: 1; padding-left: 20px; align-content:end; '> \n" +
+                        "<p>File Size: " + fileSize + " bytes</p> \n" +
+                        "<p>Elapsed Time: " + String.format("%.3f", elapsedSeconds) + " seconds</p> \n" +
+                        "<p>Throughput: " + throughputMbps + " Mbps</p> \n" +
+                        "</div>\n" +
+
+                        "</div> \n"
                 ;
+
 
         File outputFile = new File(resultDir, htmlFileName);
 
@@ -170,4 +179,5 @@ public class Client {
 
         System.out.println("Throughput report generated: " + htmlFileName);
     }
+
 }
