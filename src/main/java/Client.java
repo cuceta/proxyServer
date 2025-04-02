@@ -71,7 +71,7 @@ public class Client {
             System.out.println("Throughput (Mbps): " + throughputMbps);
 
             // Generate an HTML report with throughput information.
-            generateReport(fileSizeBytes, elapsedSeconds, throughputMbps);
+            generateReport(fileSizeBytes, elapsedSeconds, throughputMbps, downloadedFile);
 
             // --- File Integrity Validation using cmp ---
             String downloadedFilePath = host_to_server + File.separator+"temp" + File.separator + fileName;
@@ -147,7 +147,7 @@ public class Client {
         }
     }
 
-    private static void generateReport(long fileSize, double elapsedSeconds, double throughputMbps)
+    private static void generateReport(long fileSize, double elapsedSeconds, double throughputMbps, File downloadedFile)
             throws IOException {
         File resultDir = new File(host_to_server+ File.separator +"htmlFiles");
         if (!resultDir.exists()) {
@@ -156,9 +156,11 @@ public class Client {
         String htmlFileName = "drop_"+drop+"_"+windowSize+"_throughput.html";
         String htmlContent =
                 "<h1>Throughput Report for simulation with " + drop+ " drop simulation and a " + windowSize + " window size.</h1>\n" +
-                "<p>File Size: " + fileSize + " bytes</p>\n" +
+                "<div> \n<p>File Size: " + fileSize + " bytes</p>\n" +
                 "<p>Elapsed Time: " + String.format("%.3f", elapsedSeconds) + " seconds</p>\n"+
-                "<p>Throughput: " + throughputMbps + " Mbps</p>\n";
+                "<p>Throughput: " + throughputMbps + " Mbps</p>\n</div>\n" +
+                "<div> \n <img src='" + downloadedFile + "'/> \n </div>"
+                ;
 
         File outputFile = new File(resultDir, htmlFileName);
 
