@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+    <title>Proxy Server Results</title>
+
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+        }
+        header {
+          background-color: #ccd5ae;
+          padding: 10px;
+          text-align: center;
+          border-bottom: 1px solid #ccc;
+        }
+        nav {
+          background-color: #a3b18a;
+          margin-top: -5px;
+          justify-items: center;
+        }
+        nav ul {
+          margin: 0;
+          padding: 0;
+          list-style-type: none;
+          overflow: hidden;
+        }
+        nav li {
+          float: left;
+        }
+        nav a {
+          display: block;
+          color: #f2f2f2;
+          text-align: center;
+          padding: 14px 20px;
+          text-decoration: none;
+        }
+        nav a:hover {
+          background-color: #606c38;
+        }
+    </style>
+</head>
+<body style="background-color: #ccd5ae;">
+<header>
+    <h1>Proxy Server Results</h1>
+</header>
+<nav>
+    <ul>
+        <li><a href="local-local.html">local-local</a></li>
+        <li><a href="pi-rho.html">pi-rho</a></li>
+        <li><a href="rho-moxie.html">rho-moxie</a></li>
+    </ul>
+</nav>
+<main style="background-color: #fefae0; margin: 0 150px;">
+<div id="content" ></div>
+<script>
+    const files = [
+      'local-local/htmlFiles/drop_disable_1_throughput.html',
+      'local-local/htmlFiles/drop_enable_1_throughput.html',
+      'local-local/htmlFiles/drop_disable_8_throughput.html',
+      'local-local/htmlFiles/drop_enable_8_throughput.html',
+      'local-local/htmlFiles/drop_disable_64_throughput.html',
+      'local-local/htmlFiles/drop_enable_64_throughput.html'
+    ];
+    const container = document.getElementById('content');
+
+    files.forEach(file => {
+      fetch(file)
+        .then(response => response.text())
+        .then(data => {
+          container.innerHTML += data;
+        })
+        .catch(error => console.error('Error loading', file, error));
+    });
+</script>
+</main>
+</body>
+</html>
+
