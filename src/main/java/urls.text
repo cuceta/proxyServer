@@ -40,7 +40,8 @@ java Client.java "https://blogs.biomedcentral.com/bmcseriesblog/wp-content/uploa
 
 
 
-
+//    private static final String PROXY_HOST = "rho.cs.oswego.edu";
+//    private static final String PROXY_HOST = "moxie.cs.oswego.edu";
 
                                         ---==== RHO-TO-MOXIE ====---
 
