@@ -55,30 +55,37 @@
     </ul>
 </nav>
 <main style="background-color: #fefae0; margin: 0 150px;">
-    <div id="content" ></div>
-    <script>
-        const files = [
-          'rho-moxie/htmlFiles/drop_disable_1_throughput.html',
-          'rho-moxie/htmlFiles/drop_enable_1_throughput.html',
-          'rho-moxie/htmlFiles/drop_disable_8_throughput.html',
-          'rho-moxie/htmlFiles/drop_enable_8_throughput.html',
-          'rho-moxie/htmlFiles/drop_disable_64_throughput.html',
-          'rho-moxie/htmlFiles/drop_enable_64_throughput.html'
-        ];
-        const container = document.getElementById('content');
+    <div id="content">
+        <div style="text-align: center; padding: 60px 0;">
+            <img src="rho-moxie/throughput_bar_chart.png" alt="local to local throughput chart" class="resultChart"/>
 
-  (async function loadFilesSequentially() {
-    for (const file of files) {
-      try {
-        const response = await fetch(file);
-        const data = await response.text();
-        container.innerHTML += data;
-      } catch (error) {
-        console.error('Error loading', file, error);
-      }
-    }
-  })();
-    </script>
+        </div>
+        <hr/>
+
+        <script>
+            const files = [
+              'rho-moxie/htmlFiles/drop_disable_1_throughput.html',
+              'rho-moxie/htmlFiles/drop_enable_1_throughput.html',
+              'rho-moxie/htmlFiles/drop_disable_8_throughput.html',
+              'rho-moxie/htmlFiles/drop_enable_8_throughput.html',
+              'rho-moxie/htmlFiles/drop_disable_64_throughput.html',
+              'rho-moxie/htmlFiles/drop_enable_64_throughput.html'
+            ];
+            const container = document.getElementById('content');
+
+      (async function loadFilesSequentially() {
+        for (const file of files) {
+          try {
+            const response = await fetch(file);
+            const data = await response.text();
+            container.innerHTML += data;
+          } catch (error) {
+            console.error('Error loading', file, error);
+          }
+        }
+      })();
+        </script>
+    </div>
 </main>
 </body>
 </html>
