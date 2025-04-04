@@ -6,7 +6,6 @@ public class Client {
     private static final String PROXY_HOST = "localhost";
     private static final int PROXY_PORT = 26896;
 
-    // Make host_to_server global (public) so that it can be changed.
     private static String host_to_server;
 
     // Image URL and parameters.

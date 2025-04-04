@@ -13,15 +13,15 @@ import java.io.IOException;
 
 public class GraphGenerator {
     // Global variable host_to_server; change as needed.
-    public static String host_to_server = "defaultPath";
+    public static String host_to_server = "local-local";
 
     public static void main(String[] args) {
         // Expect six x-axis labels as command-line arguments.
-        if (args.length != 6) {
-            System.out.println("Please provide 6 x-axis labels.");
-            return;
-        }
-        String[] xLabels = args;
+//        if (args.length != 6) {
+//            System.out.println("Please provide 6 x-axis labels.");
+//            return;
+//        }
+        String[] xLabels = {"1NoDrop", "1Drop", "8NoDrop", "8Drop", "64NoDrop", "64Drop"};
 
         // Expected JSON file names.
         String[] jsonFiles = {
