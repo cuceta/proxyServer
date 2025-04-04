@@ -1,5 +1,3 @@
-package org.example;
-
 public class Encryption {
     private static long xorShift(long r) {
         r ^= (r << 13);
