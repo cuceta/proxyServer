@@ -21,6 +21,9 @@ import java.io.IOException;
 public class GraphGenerator {
     // Global variable host_to_server; change as needed.
     public static String host_to_server = "local-local";
+//    public static String host_to_server = "pi-rho";
+//
+//    public static String host_to_server = "rho-moxie";
 
     public static void main(String[] args) {
         // Using preset x-axis labels.

@@ -5,7 +5,6 @@ import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-
 public class ClientHandler implements Runnable {
     private static final Map<String, byte[]> cache = new HashMap<>();
     private Socket clientSocket;
