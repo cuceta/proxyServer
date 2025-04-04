@@ -67,15 +67,18 @@
     ];
     const container = document.getElementById('content');
 
-    files.forEach(file => {
-      fetch(file)
-        .then(response => response.text())
-        .then(data => {
-          container.innerHTML += data;
-        })
-        .catch(error => console.error('Error loading', file, error));
-    });
-</script>
+  (async function loadFilesSequentially() {
+    for (const file of files) {
+      try {
+        const response = await fetch(file);
+        const data = await response.text();
+        container.innerHTML += data;
+      } catch (error) {
+        console.error('Error loading', file, error);
+      }
+    }
+  })();
+</script>\
 </main>
 </body>
 </html>

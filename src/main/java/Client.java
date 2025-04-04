@@ -3,10 +3,10 @@ import java.net.Socket;
 import java.util.Random;
 
 public class Client {
-//    private static final String PROXY_HOST = "localhost";
+    private static final String PROXY_HOST = "localhost";
 
 //    private static final String PROXY_HOST = "rho.cs.oswego.edu";
-    private static final String PROXY_HOST = "moxie.cs.oswego.edu";
+//    private static final String PROXY_HOST = "moxie.cs.oswego.edu";
 
     private static final int PROXY_PORT = 26896;
 
@@ -37,7 +37,7 @@ public class Client {
              DataInputStream in = new DataInputStream(socket.getInputStream())) {
 
             // --- Encryption Key Exchange ---
-            int clientID = 123;  // Arbitrary client ID.
+            int clientID = 123;
             int clientRandom = new Random().nextInt(1000);
             out.writeInt(clientID);
             out.writeInt(clientRandom);

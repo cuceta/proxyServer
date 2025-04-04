@@ -53,7 +53,6 @@ public class ClientHandler implements Runnable {
                 saveFileToTmp(fileData, url);
             }
 
-            // --- Send File Using TFTP-like Protocol (Sliding Window, RTO, Packet Drop Simulation) ---
             sendFileWithSlidingWindow(fileData, out, in);
 
         } catch (IOException e) {
@@ -114,7 +113,6 @@ public class ClientHandler implements Runnable {
             // Send all packets in the window that haven't been acknowledged.
             for (int seq = base; seq < windowEnd; seq++) {
                 if (!acked[seq]) {
-                    // Optional: simulate packet drop
                     if (simulateDrop && Math.random() < 0.01) {
                         System.out.println("Simulating drop of packet: " + seq);
                         continue;
