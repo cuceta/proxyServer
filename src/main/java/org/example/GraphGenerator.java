@@ -90,7 +90,7 @@ public class GraphGenerator {
                 dir.mkdirs(); // Create the directory if it doesn't exist.
             }
             File outputFile = new File(dir, "throughput_bar_chart.png");
-            ChartUtils.saveChartAsPNG(outputFile, barChart, 800, 600);
+            ChartUtils.saveChartAsPNG(outputFile, barChart, 1000, 700);
             System.out.println("Graph saved as: " + outputFile.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
