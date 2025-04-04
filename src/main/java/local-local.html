@@ -41,6 +41,17 @@
         nav a:hover {
           background-color: #606c38;
         }
+        resultChart {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        hr {
+            height: 0;
+            border: none;
+            border-top: 5px solid #a3b18a;
+            margin: 20px 10px;
+        }
     </style>
 </head>
 <body style="background-color: #ccd5ae;">
@@ -55,8 +66,13 @@
     </ul>
 </nav>
 <main style="background-color: #fefae0; margin: 0 150px;">
-<div id="content" ></div>
-<script>
+<div id="content" >
+    <div style="text-align: center; padding: 60px 0;">
+        <img src="./local-local/throughput_bar_chart.png" alt="local to local throughput chart" class="resultChart"/>
+
+    </div>
+    <hr/>
+    <script>
     const files = [
       'local-local/htmlFiles/drop_disable_1_throughput.html',
       'local-local/htmlFiles/drop_enable_1_throughput.html',
@@ -78,7 +94,8 @@
       }
     }
   })();
-</script>\
+</script>
+</div>
 </main>
 </body>
 </html>
