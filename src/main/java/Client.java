@@ -38,7 +38,7 @@ public class Client {
 
             // --- Encryption Key Exchange ---
             int clientID = 123;  // Arbitrary client ID.
-//            int clientRandom = new Random().nextInt(1000);
+            int clientRandom = new Random().nextInt(1000);
             out.writeInt(clientID);
             out.writeInt(clientRandom);
             out.flush();
