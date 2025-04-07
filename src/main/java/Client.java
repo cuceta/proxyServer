@@ -140,7 +140,7 @@ public class Client {
             resultDirHTML.mkdirs();
         }
 
-        File resultDirCSV = new File(host_to_server + File.separator + "htmlFiles");
+        File resultDirCSV = new File(host_to_server + File.separator + "resultsCSV");
         if (!resultDirCSV.exists()) {
             resultDirCSV.mkdirs();
         }
