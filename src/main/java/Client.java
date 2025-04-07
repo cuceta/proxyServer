@@ -3,7 +3,10 @@ import java.net.Socket;
 import java.util.Random;
 
 public class Client {
-    private static final String PROXY_HOST = "localhost";
+//    private static final String PROXY_HOST = "localhost";
+//        private static final String PROXY_HOST = "rho.cs.oswego.edu";
+        private static final String PROXY_HOST = "moxie.cs.oswego.edu";
+
     private static final int PROXY_PORT = 26896;
 
     // ICE CREAM image URL is now provided via command line arguments.

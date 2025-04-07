@@ -15,22 +15,9 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 public class GraphGenerator {
 
-    private static final String host_to_server = "local-local";
-
+//    private static final String host_to_server = "local-local";
 //    private static final String host_to_server = "pi-rho";
-//
-//    private static final String host_to_server = "rho-moxie";
-
-    /**
-     * Generates a bar chart using throughput data from CSV files.
-     *
-     * @param csvFilePaths Array of CSV file paths (each containing throughput data).
-     * @param xAxisLabels  Array of labels for the x-axis (one for each CSV file).
-     * @param chartTitle   Title of the chart.
-     * @param xAxisLabel   Label for the x-axis.
-     * @param yAxisLabel   Label for the y-axis.
-     * @param outputPath   Path (including filename) where the chart image will be saved.
-     */
+    private static final String host_to_server = "rho-moxie";
 
 
     public static void generateBarChart(String[] csvFilePaths, String[] xAxisLabels,
@@ -85,13 +72,6 @@ public class GraphGenerator {
         }
     }
 
-    /**
-     * Reads the throughput value from a CSV file.
-     * Assumes the CSV file has a header row and then a single data row with the throughput value in the third column.
-     *
-     * @param csvFilePath Path to the CSV file.
-     * @return The throughput value, or 0.0 if reading fails.
-     */
     private static double readThroughputFromCSV(String csvFilePath) {
         double throughput = 0.0;
         try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
