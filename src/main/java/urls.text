@@ -19,6 +19,26 @@ https://blogs.biomedcentral.com/bmcseriesblog/wp-content/uploads/sites/9/2017/03
 
 
 
+                                            ---==== LOCAL-TO-LOCAL ====---
+
+java Client.java "https://content.lyka.com.au/f/1016262/1936x1549/a00939d945/chow-chow.jpg" 1 enable local-local
+
+java Client.java "https://content.lyka.com.au/f/1016262/1936x1549/a00939d945/chow-chow.jpg" 1 disable local-local
+
+            -------------------------------------------------------------------------------
+
+java Client.java "https://a-us.storyblok.com/f/1016262/2119x1415/56d51ba88d/samoyed.jpg" 8 enable local-local
+
+java Client.java "https://a-us.storyblok.com/f/1016262/2119x1415/56d51ba88d/samoyed.jpg" 8 disable local-local
+
+            -------------------------------------------------------------------------------
+
+java Client.java "https://blogs.biomedcentral.com/bmcseriesblog/wp-content/uploads/sites/9/2017/03/ChowChow2Szczecin.jpg" 64 enable local-local
+
+java Client.java "https://blogs.biomedcentral.com/bmcseriesblog/wp-content/uploads/sites/9/2017/03/ChowChow2Szczecin.jpg" 64 disable local-local
+
+
+
                                             ---==== PI-TO-RHO ====---
 
 java Client.java "https://content.lyka.com.au/f/1016262/1936x1549/a00939d945/chow-chow.jpg" 1 enable pi-rho
