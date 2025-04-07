@@ -135,9 +135,14 @@ public class Client {
 
     private static void generateReport(long fileSize, double elapsedSeconds, double throughputMbps, File downloadedFile)
             throws IOException {
-        File resultDir = new File(host_to_server + File.separator + "htmlFiles");
-        if (!resultDir.exists()) {
-            resultDir.mkdirs();
+        File resultDirHTML = new File(host_to_server + File.separator + "htmlFiles");
+        if (!resultDirHTML.exists()) {
+            resultDirHTML.mkdirs();
+        }
+
+        File resultDirCSV = new File(host_to_server + File.separator + "htmlFiles");
+        if (!resultDirCSV.exists()) {
+            resultDirCSV.mkdirs();
         }
         // Create a base name for both the HTML and CSV files.
         String baseName = "drop_" + drop + "_" + windowSize + "_throughput";
@@ -158,7 +163,7 @@ public class Client {
                         "</div> \n";
 
         // Save the HTML report.
-        File htmlFile = new File(resultDir, htmlFileName);
+        File htmlFile = new File(resultDirHTML, htmlFileName);
         try (FileWriter writer = new FileWriter(htmlFile)) {
             writer.write(htmlContent);
         }
@@ -166,7 +171,7 @@ public class Client {
 
         // Save the throughput data in a CSV file.
         String csvFileName = baseName + ".csv";
-        File csvFile = new File(host_to_server, csvFileName);
+        File csvFile = new File(resultDirCSV, csvFileName);
         try (FileWriter csvWriter = new FileWriter(csvFile)) {
             // Write header and data row.
             csvWriter.write("FileSize,ElapsedTime,Throughput\n");

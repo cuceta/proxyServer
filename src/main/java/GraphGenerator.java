@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -6,10 +7,18 @@ import java.io.IOException;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 public class GraphGenerator {
+
+    private static final String host_to_server = "local-local";
+
+//    private static final String host_to_server = "pi-rho";
+//
+//    private static final String host_to_server = "rho-moxie";
 
     /**
      * Generates a bar chart using throughput data from CSV files.
@@ -47,6 +56,18 @@ public class GraphGenerator {
                 dataset,
                 PlotOrientation.VERTICAL,
                 true, true, false);
+
+
+        // Set the bar color to green.
+        CategoryPlot plot = barChart.getCategoryPlot();
+        BarRenderer renderer = (BarRenderer) plot.getRenderer();
+        Color green = Color.decode("#a3b18a");
+        renderer.setSeriesPaint(0, green);
+
+        // Set the plot background to white.
+        Color grey =Color.decode("#ede6dd");
+        plot.setBackgroundPaint(grey);
+
 
         int width = 800;
         int height = 600;
@@ -88,20 +109,21 @@ public class GraphGenerator {
 
     // Example main method for testing.
     public static void main(String[] args) {
-        // Example CSV file paths (update these paths as needed).
+        String baseDir = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "java" + File.separator + host_to_server + File.separator + "resultsCSV" + File.separator;
         String[] csvFiles = {
-                "htmlFiles/drop_disable_1_throughput.csv",
-                "htmlFiles/drop_enable_1_throughput.csv",
-                "htmlFiles/drop_disable_8_throughput.csv",
-                "htmlFiles/drop_enable_8_throughput.csv",
-                "htmlFiles/drop_disable_64_throughput.csv",
-                "htmlFiles/drop_enable_64_throughput.csv"
+                baseDir + "drop_disable_1_throughput.csv",
+                baseDir + "drop_enable_1_throughput.csv",
+                baseDir + "drop_disable_8_throughput.csv",
+                baseDir + "drop_enable_8_throughput.csv",
+                baseDir + "drop_disable_64_throughput.csv",
+                baseDir + "drop_enable_64_throughput.csv"
         };
+
         // Corresponding x-axis labels.
         String[] xAxisLabels = {"1NoDrop", "1Drop", "8NoDrop", "8Drop", "64NoDrop", "64Drop"};
 
         generateBarChart(csvFiles, xAxisLabels,
                 "Throughput", "Test Cases", "Throughput (Mbps)",
-                 "bar_chart.png");
+                 baseDir+ "bar_chart.png");
     }
 }

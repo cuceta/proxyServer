@@ -41,6 +41,17 @@
         nav a:hover {
           background-color: #606c38;
         }
+        resultChart {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        hr {
+            height: 0;
+            border: none;
+            border-top: 5px solid #a3b18a;
+            margin: 20px 10px;
+        }
     </style>
 </head>
 <body style="background-color: #ccd5ae;">
@@ -55,28 +66,37 @@
     </ul>
 </nav>
 <main style="background-color: #fefae0; margin: 0 150px;">
-<div id="content" ></div>
-<script>
-    const files = [
-      'local-local/htmlFiles/drop_disable_1_throughput.html',
-      'local-local/htmlFiles/drop_enable_1_throughput.html',
-      'local-local/htmlFiles/drop_disable_8_throughput.html',
-      'local-local/htmlFiles/drop_enable_8_throughput.html',
-      'local-local/htmlFiles/drop_disable_64_throughput.html',
-      'local-local/htmlFiles/drop_enable_64_throughput.html'
-    ];
-    const container = document.getElementById('content');
+    <div id="content">
+        <div style="text-align: center; padding: 60px 0;">
+<!--            <img src="local-local/temp/drop_enable_64_blogs.biomedcentral.com_bmcseriesblog_wp-content_uploads_sites_9_2017_03_ChowChow2Szczecin.jpg"/>-->
+            <img src="local-local/resultsCSV/bar_chart.png" alt="local to local throughput chart" class="resultChart"/>
 
-    files.forEach(file => {
-      fetch(file)
-        .then(response => response.text())
-        .then(data => {
-          container.innerHTML += data;
-        })
-        .catch(error => console.error('Error loading', file, error));
-    });
-</script>
+        </div>
+        <hr/>
+        <script>
+            const files = [
+              'local-local/htmlFiles/drop_disable_1_throughput.html',
+              'local-local/htmlFiles/drop_enable_1_throughput.html',
+              'local-local/htmlFiles/drop_disable_8_throughput.html',
+              'local-local/htmlFiles/drop_enable_8_throughput.html',
+              'local-local/htmlFiles/drop_disable_64_throughput.html',
+              'local-local/htmlFiles/drop_enable_64_throughput.html'
+            ];
+            const container = document.getElementById('content');
+
+          (async function loadFilesSequentially() {
+            for (const file of files) {
+              try {
+                const response = await fetch(file);
+                const data = await response.text();
+                container.innerHTML += data;
+              } catch (error) {
+                console.error('Error loading', file, error);
+              }
+            }
+          })();
+        </script>
+    </div>
 </main>
 </body>
 </html>
-
