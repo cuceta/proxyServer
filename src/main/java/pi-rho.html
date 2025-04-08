@@ -73,29 +73,29 @@
 
         </div>
         <hr/>
-        <script>
-            const files = [
-              'pi-rho/htmlFiles/drop_disable_1_throughput.html',
-              'pi-rho/htmlFiles/drop_enable_1_throughput.html',
-              'pi-rho/htmlFiles/drop_disable_8_throughput.html',
-              'pi-rho/htmlFiles/drop_enable_8_throughput.html',
-              'pi-rho/htmlFiles/drop_disable_64_throughput.html',
-              'pi-rho/htmlFiles/drop_enable_64_throughput.html'
-            ];
-            const container = document.getElementById('content');
+<!--        <script>-->
+<!--            const files = [-->
+<!--              'pi-rho/htmlFiles/drop_disable_1_throughput.html',-->
+<!--              'pi-rho/htmlFiles/drop_enable_1_throughput.html',-->
+<!--              'pi-rho/htmlFiles/drop_disable_8_throughput.html',-->
+<!--              'pi-rho/htmlFiles/drop_enable_8_throughput.html',-->
+<!--              'pi-rho/htmlFiles/drop_disable_64_throughput.html',-->
+<!--              'pi-rho/htmlFiles/drop_enable_64_throughput.html'-->
+<!--            ];-->
+<!--            const container = document.getElementById('content');-->
 
-          (async function loadFilesSequentially() {
-            for (const file of files) {
-              try {
-                const response = await fetch(file);
-                const data = await response.text();
-                container.innerHTML += data;
-              } catch (error) {
-                console.error('Error loading', file, error);
-              }
-            }
-          })();
-        </script>
+<!--          (async function loadFilesSequentially() {-->
+<!--            for (const file of files) {-->
+<!--              try {-->
+<!--                const response = await fetch(file);-->
+<!--                const data = await response.text();-->
+<!--                container.innerHTML += data;-->
+<!--              } catch (error) {-->
+<!--                console.error('Error loading', file, error);-->
+<!--              }-->
+<!--            }-->
+<!--          })();-->
+<!--        </script>-->
     </div>
 </main>
 </body>
