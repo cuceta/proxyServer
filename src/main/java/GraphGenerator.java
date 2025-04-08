@@ -15,9 +15,9 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 public class GraphGenerator {
 
-//    private static final String host_to_server = "local-local";
+    private static final String host_to_server = "local-local";
 //    private static final String host_to_server = "pi-rho";
-    private static final String host_to_server = "rho-moxie";
+//    private static final String host_to_server = "rho-moxie";
 
 
     public static void generateBarChart(String[] csvFilePaths, String[] xAxisLabels,

@@ -3,9 +3,9 @@ import java.net.Socket;
 import java.util.Random;
 
 public class Client {
-//    private static final String PROXY_HOST = "localhost";
+    private static final String PROXY_HOST = "localhost";
 //        private static final String PROXY_HOST = "rho.cs.oswego.edu";
-        private static final String PROXY_HOST = "moxie.cs.oswego.edu";
+//        private static final String PROXY_HOST = "moxie.cs.oswego.edu";
 
     private static final int PROXY_PORT = 26896;
 
@@ -43,7 +43,6 @@ public class Client {
 
             // Determine file name based on URL.
             String fileName = "drop_" + drop + "_" + windowSize + "_" + sanitizeFileName(URL);
-            System.out.println("Saving downloaded file as: " + fileName);
 
             // --- Measure Throughput ---
             long startTime = System.nanoTime();
