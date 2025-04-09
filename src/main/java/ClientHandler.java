@@ -126,6 +126,7 @@ public class ClientHandler implements Runnable {
                     System.arraycopy(fileData, start, chunk, 0, length);
                     // Encrypt the chunk
                     byte[] encryptedChunk = Encryption.encryptDecrypt(chunk, key);
+
                     // Send packet header: sequence number and length, then the encrypted data.
                     out.writeInt(seq);
                     out.writeInt(encryptedChunk.length);
