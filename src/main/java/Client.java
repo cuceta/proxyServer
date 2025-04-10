@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 
 public class Client {
     private static final String PROXY_HOST = "localhost";
@@ -75,34 +77,48 @@ public class Client {
 
     private static void receiveFileWithSlidingWindow(DataInputStream in, DataOutputStream out, String fileName, long key)
             throws IOException {
+        // Create the temporary directory if it doesn't exist.
         File tempDir = new File(host_to_server + File.separator + "temp");
         if (!tempDir.exists()) {
             tempDir.mkdirs();
         }
         File outputFile = new File(tempDir, fileName);
+
+        // Use a TreeMap to hold packets in sorted order by sequence number.
+        TreeMap<Integer, byte[]> packetMap = new TreeMap<>();
+
+        // Read packets until termination.
+        while (true) {
+            int seq;
+            try {
+                seq = in.readInt();
+            } catch (EOFException e) {
+                System.out.println("End of stream reached.");
+                break;
+            }
+            if (seq == -1) {  // Termination packet.
+                break;
+            }
+            int length = in.readInt();
+            byte[] encryptedBuffer = new byte[length];
+            in.readFully(encryptedBuffer);
+
+            // Decrypt the received data.
+            byte[] buffer = Encryption.encryptDecrypt(encryptedBuffer, key);
+
+            // Store the packet by its sequence number.
+            packetMap.put(seq, buffer);
+
+            // Send an acknowledgment for this packet.
+            out.writeInt(seq);
+            out.flush();
+            System.out.println("Sent ACK for packet: " + seq);
+        }
+
+        // After all packets are received, write them in the correct order.
         try (FileOutputStream fileOut = new FileOutputStream(outputFile)) {
-            while (true) {
-                int seq;
-                try {
-                    seq = in.readInt();
-                } catch (EOFException e) {
-                    System.out.println("End of stream reached.");
-                    break;
-                }
-                if (seq == -1) {  // Termination packet.
-                    break;
-                }
-                int length = in.readInt();
-                byte[] encryptedBuffer = new byte[length];
-                in.readFully(encryptedBuffer);
-                // Decrypt the received data.
-                byte[] buffer = Encryption.encryptDecrypt(encryptedBuffer, key);
-                fileOut.write(buffer);
-                fileOut.flush();
-                // Send acknowledgment.
-                out.writeInt(seq);
-                out.flush();
-                System.out.println("Sent ACK for packet: " + seq);
+            for (Map.Entry<Integer, byte[]> entry : packetMap.entrySet()) {
+                fileOut.write(entry.getValue());
             }
         }
     }
