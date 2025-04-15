@@ -53,8 +53,8 @@ public class ClientHandler implements Runnable {
                 saveFileToTmp(fileData, url);
             }
 
-            // --- Send File Using TFTP-like Protocol (Sliding Window, RTO, Packet Drop Simulation) ---
-            sendFileWithSlidingWindow(fileData, out, in);
+            // --- Send File Using TFTP-like Protocol with TCP-Like RTO ---
+            sendFileWithSlidingWindow(fileData, out, in, encryptionKey);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -95,37 +95,64 @@ public class ClientHandler implements Runnable {
         return sanitized;
     }
 
-    private void sendFileWithSlidingWindow(byte[] fileData, DataOutputStream out, DataInputStream in) throws IOException {
+    /**
+     * Sends the file using a sliding window protocol with dynamic retransmission timeout (RTO)
+     * that is updated according to a TCP-like RTT measurement scheme.
+     *
+     * @param fileData      The file data to send.
+     * @param out           The output stream to send packets.
+     * @param in            The input stream to receive ACKs.
+     * @param encryptionKey The key used for encrypting packets.
+     * @throws IOException If an I/O error occurs.
+     */
+    private void sendFileWithSlidingWindow(byte[] fileData, DataOutputStream out, DataInputStream in, int encryptionKey) throws IOException {
         final int CHUNK_SIZE = 1024;
         final int WINDOW_SIZE = this.windowSize;
-        final int TIMEOUT = 2000; // milliseconds
+
+        // TCP-like RTT estimation constants.
+        final double INITIAL_R = 1000.0; // starting RTT in ms (1sec)
+        final double ALPHA = 0.125;      // SRTT weight factor
+        final double BETA  = 0.25;       // RTTVAR weight factor
+        final double K = 4.0;            // multiplier for RTTVAR in RTO
+        final double G = 17.0;           // minimum timeout granularity in ms
+
+        // Initialize RTT estimators.
+        double SRTT = INITIAL_R;
+        double RTTVAR = INITIAL_R / 2.0;
+        double RTO = SRTT + Math.max(K * RTTVAR, G);  // initial RTO
 
         int totalPackets = (int) Math.ceil(fileData.length / (double) CHUNK_SIZE);
         boolean[] acked = new boolean[totalPackets];
+        boolean[] firstTransmission = new boolean[totalPackets];
+        long[] sentTimes = new long[totalPackets];
+        // Mark all packets as pending first transmission.
+        for (int i = 0; i < totalPackets; i++) {
+            firstTransmission[i] = true;
+        }
         int base = 0;
 
-        long key = (long) (clientRandom ^ serverRandom);
+        // Set an initial socket timeout.
+        clientSocket.setSoTimeout((int) RTO);
 
-        clientSocket.setSoTimeout(TIMEOUT);
-
+        // Loop until all packets have been acknowledged.
         while (base < totalPackets) {
             int windowEnd = Math.min(base + WINDOW_SIZE, totalPackets);
 
-            // Send all packets in the window that haven't been acknowledged.
+            // Send all packets in the current window that have not been acknowledged.
             for (int seq = base; seq < windowEnd; seq++) {
                 if (!acked[seq]) {
-                    //simulate packet drop
+                    // Simulate packet drop if enabled.
                     if (simulateDrop && Math.random() < 0.01) {
                         System.out.println("Simulating drop of packet: " + seq);
                         continue;
                     }
                     int start = seq * CHUNK_SIZE;
                     int length = Math.min(CHUNK_SIZE, fileData.length - start);
-                    // Get the current chunk
                     byte[] chunk = new byte[length];
                     System.arraycopy(fileData, start, chunk, 0, length);
-                    // Encrypt the chunk
-                    byte[] encryptedChunk = Encryption.encryptDecrypt(chunk, key);
+
+                    // Encrypt the chunk.
+                    byte[] encryptedChunk = Encryption.encryptDecrypt(chunk, encryptionKey);
 
                     // Send packet header: sequence number and length, then the encrypted data.
                     out.writeInt(seq);
@@ -133,21 +160,50 @@ public class ClientHandler implements Runnable {
                     out.write(encryptedChunk);
                     out.flush();
                     System.out.println("Sent packet: " + seq);
+
+                    // Record send time for RTT measurement if this is the first transmission.
+                    if (firstTransmission[seq]) {
+                        sentTimes[seq] = System.currentTimeMillis();
+                    }
                 }
             }
 
-            // Wait for acknowledgments in the current window.
-            long startTime = System.currentTimeMillis();
-            while (System.currentTimeMillis() - startTime < TIMEOUT) {
+            // Wait for ACKs in the current window using the current dynamic RTO.
+            long windowStartTime = System.currentTimeMillis();
+            while (true) {
+                long now = System.currentTimeMillis();
+                long elapsed = now - windowStartTime;
+                if (elapsed >= RTO) {
+                    System.out.println("Timeout reached for current window (RTO = " + RTO + " ms). Retransmitting unacked packets.");
+                    break;
+                }
+                // Adjust socket timeout for the remaining time in this window.
+                int remainingTimeout = (int) (RTO - elapsed);
+                clientSocket.setSoTimeout(remainingTimeout);
                 try {
                     int ackSeq = in.readInt();
                     System.out.println("Received ACK for packet: " + ackSeq);
-                    if (ackSeq >= base && ackSeq < windowEnd) {
+                    if (ackSeq >= base && ackSeq < windowEnd && !acked[ackSeq]) {
                         acked[ackSeq] = true;
+                        // Update RTT estimates only if this ACK is for a packet's first transmission.
+                        if (firstTransmission[ackSeq]) {
+                            long measuredRTT = now - sentTimes[ackSeq];
+                            SRTT = ALPHA * measuredRTT + (1 - ALPHA) * SRTT; // Update SRTT.
+                            RTTVAR = BETA * Math.abs(measuredRTT - SRTT) + (1 - BETA) * RTTVAR;  // Update RTTVAR (using absolute error).
+                            RTO = SRTT + Math.max(K * RTTVAR, G); // Recalculate  RTO.
+                            System.out.println("Updated RTT metrics -- measured RTT: " + measuredRTT +
+                                    " ms, SRTT: " + SRTT + " ms, RTTVAR: " + RTTVAR +
+                                    " ms, new RTO: " + RTO + " ms");
+                            // Mark that we do not update RTT for retransmitted packets.
+                            firstTransmission[ackSeq] = false;
+                        }
                     }
                 } catch (SocketTimeoutException e) {
-                    break;  // Timeout: retransmit unacknowledged packets in this window.
+                    // No ACK received within the remaining timeout.
+                    System.out.println("Socket timed out waiting for ACKs in the current window.");
+                    break;
                 }
+                // If all packets in the window are acknowledged, exit the waiting loop.
                 boolean allAcked = true;
                 for (int seq = base; seq < windowEnd; seq++) {
                     if (!acked[seq]) {
@@ -159,7 +215,8 @@ public class ClientHandler implements Runnable {
                     break;
                 }
             }
-            // Slide the window forward.
+
+            // Slide the window forward past all acknowledged packets.
             while (base < totalPackets && acked[base]) {
                 base++;
             }
@@ -169,5 +226,4 @@ public class ClientHandler implements Runnable {
         out.flush();
         System.out.println("File transmission complete.");
     }
-
 }
