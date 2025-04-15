@@ -95,16 +95,7 @@ public class ClientHandler implements Runnable {
         return sanitized;
     }
 
-    /**
-     * Sends the file using a sliding window protocol with dynamic retransmission timeout (RTO)
-     * that is updated according to a TCP-like RTT measurement scheme.
-     *
-     * @param fileData      The file data to send.
-     * @param out           The output stream to send packets.
-     * @param in            The input stream to receive ACKs.
-     * @param encryptionKey The key used for encrypting packets.
-     * @throws IOException If an I/O error occurs.
-     */
+
     private void sendFileWithSlidingWindow(byte[] fileData, DataOutputStream out, DataInputStream in, int encryptionKey) throws IOException {
         final int CHUNK_SIZE = 1024;
         final int WINDOW_SIZE = this.windowSize;
