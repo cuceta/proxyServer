@@ -11,7 +11,7 @@ public class ProxyServer {
     public static void main(String[] args) {
         // Require a window size argument.
         if (args.length < 1) {
-            System.out.println("Usage: java ProxyServer <window_size> [drop]");
+//            System.out.println("Usage: java ProxyServer <window_size> [drop]");
             System.exit(1);
         }
 
@@ -19,7 +19,7 @@ public class ProxyServer {
         try {
             windowSize = Integer.parseInt(args[0]);
         } catch (NumberFormatException e) {
-            System.out.println("Invalid window size. Must be an integer.");
+//            System.out.println("Invalid window size. Must be an integer.");
             System.exit(1);
         }
 
@@ -27,13 +27,13 @@ public class ProxyServer {
         boolean simulateDrop = false;
         if (args.length > 1 && args[1].equalsIgnoreCase("drop")) {
             simulateDrop = true;
-            System.out.println("Simulating 1% packet loss enabled.");
+//            System.out.println("Simulating 1% packet loss enabled.");
         }
 
         ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("Proxy Server started on port " + PORT);
+//            System.out.println("Proxy Server started on port " + PORT);
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();

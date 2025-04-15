@@ -37,7 +37,7 @@ public class Client {
             int serverID = in.readInt();
             int serverRandom = in.readInt();
             int encryptionKey = clientRandom ^ serverRandom;
-            System.out.println("Encryption Key Established: " + encryptionKey);
+//            System.out.println("Encryption Key Established: " + encryptionKey);
 
             // --- Send the URL ---
             out.writeUTF(URL);
@@ -58,9 +58,9 @@ public class Client {
             double throughputBps = (fileSizeBytes * 8) / elapsedSeconds;
             double throughputMbps = throughputBps / 1e6;
 
-            System.out.println("File Size (bytes): " + fileSizeBytes);
-            System.out.println("Elapsed Time (seconds): " + elapsedSeconds);
-            System.out.println("Throughput (Mbps): " + throughputMbps);
+//            System.out.println("File Size (bytes): " + fileSizeBytes);
+//            System.out.println("Elapsed Time (seconds): " + elapsedSeconds);
+//            System.out.println("Throughput (Mbps): " + throughputMbps);
 
             // Generate an HTML report with throughput information and save CSV.
             generateReport(fileSizeBytes, elapsedSeconds, throughputMbps, downloadedFile);
@@ -93,7 +93,7 @@ public class Client {
             try {
                 seq = in.readInt();
             } catch (EOFException e) {
-                System.out.println("End of stream reached.");
+//                System.out.println("End of stream reached.");
                 break;
             }
             if (seq == -1) {  // Termination packet.
@@ -112,7 +112,7 @@ public class Client {
             // Send an acknowledgment for this packet.
             out.writeInt(seq);
             out.flush();
-            System.out.println("Sent ACK for packet: " + seq);
+//            System.out.println("Sent ACK for packet: " + seq);
         }
 
         // After all packets are received, write them in the correct order.
@@ -133,19 +133,19 @@ public class Client {
     private static void validateFileIntegrity(String downloadedFilePath, String referenceFilePath)
             throws IOException, InterruptedException {
         String command = "cmp " + downloadedFilePath + " " + referenceFilePath;
-        System.out.println("Validating file integrity with command: " + command);
+//        System.out.println("Validating file integrity with command: " + command);
         Process process = Runtime.getRuntime().exec(command);
         int exitCode = process.waitFor();
 
         if (exitCode == 0) {
-            System.out.println("File integrity validated: files match.");
+//            System.out.println("File integrity validated: files match.");
         } else {
-            System.out.println("File integrity check failed: files differ.");
+//            System.out.println("File integrity check failed: files differ.");
             try (BufferedReader errorReader = new BufferedReader(
                     new InputStreamReader(process.getErrorStream()))) {
                 String line;
                 while ((line = errorReader.readLine()) != null) {
-                    System.out.println(line);
+//                    System.out.println(line);
                 }
             }
         }
@@ -185,7 +185,7 @@ public class Client {
         try (FileWriter writer = new FileWriter(htmlFile)) {
             writer.write(htmlContent);
         }
-        System.out.println("Throughput report generated: " + htmlFileName);
+//        System.out.println("Throughput report generated: " + htmlFileName);
 
         // Save the throughput data in a CSV file.
         String csvFileName = baseName + ".csv";
@@ -195,6 +195,6 @@ public class Client {
             csvWriter.write("FileSize,ElapsedTime,Throughput\n");
             csvWriter.write(fileSize + "," + elapsedSeconds + "," + throughputMbps + "\n");
         }
-        System.out.println("Throughput data saved to CSV: " + csvFileName);
+//        System.out.println("Throughput data saved to CSV: " + csvFileName);
     }
 }

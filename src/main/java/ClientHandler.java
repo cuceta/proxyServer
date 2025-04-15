@@ -36,18 +36,18 @@ public class ClientHandler implements Runnable {
             out.flush();
 
             int encryptionKey = clientRandom ^ serverRandom;
-            System.out.println("Encryption Key Established: " + encryptionKey);
+//            System.out.println("Encryption Key Established: " + encryptionKey);
 
             // --- Read the URL ---
             String url = in.readUTF();
-            System.out.println("Client requested: " + url);
+//            System.out.println("Client requested: " + url);
 
             byte[] fileData;
             if (cache.containsKey(url)) {
-                System.out.println("Cache hit for: " + url);
+//                System.out.println("Cache hit for: " + url);
                 fileData = cache.get(url);
             } else {
-                System.out.println("Fetching data for: " + url);
+//                System.out.println("Fetching data for: " + url);
                 fileData = fetchFromServer(url);
                 cache.put(url, fileData);
                 saveFileToTmp(fileData, url);
@@ -83,9 +83,9 @@ public class ClientHandler implements Runnable {
         File file = new File("/tmp", fileName);
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(fileData);
-            System.out.println("Saved file to " + file.getAbsolutePath());
+//            System.out.println("Saved file to " + file.getAbsolutePath());
         } catch (IOException e) {
-            System.out.println("Error saving file: " + e.getMessage());
+//            System.out.println("Error saving file: " + e.getMessage());
         }
     }
 
@@ -134,7 +134,7 @@ public class ClientHandler implements Runnable {
                 if (!acked[seq]) {
                     // Simulate packet drop if enabled.
                     if (simulateDrop && Math.random() < 0.01) {
-                        System.out.println("Simulating drop of packet: " + seq);
+//                        System.out.println("Simulating drop of packet: " + seq);
                         continue;
                     }
                     int start = seq * CHUNK_SIZE;
@@ -150,7 +150,7 @@ public class ClientHandler implements Runnable {
                     out.writeInt(encryptedChunk.length);
                     out.write(encryptedChunk);
                     out.flush();
-                    System.out.println("Sent packet: " + seq);
+//                    System.out.println("Sent packet: " + seq);
 
                     // Record send time for RTT measurement if this is the first transmission.
                     if (firstTransmission[seq]) {
@@ -165,7 +165,7 @@ public class ClientHandler implements Runnable {
                 long now = System.currentTimeMillis();
                 long elapsed = now - windowStartTime;
                 if (elapsed >= RTO) {
-                    System.out.println("Timeout reached for current window (RTO = " + RTO + " ms). Retransmitting unacked packets.");
+//                    System.out.println("Timeout reached for current window (RTO = " + RTO + " ms). Retransmitting unacked packets.");
                     break;
                 }
                 // Adjust socket timeout for the remaining time in this window.
@@ -173,7 +173,7 @@ public class ClientHandler implements Runnable {
                 clientSocket.setSoTimeout(remainingTimeout);
                 try {
                     int ackSeq = in.readInt();
-                    System.out.println("Received ACK for packet: " + ackSeq);
+//                    System.out.println("Received ACK for packet: " + ackSeq);
                     if (ackSeq >= base && ackSeq < windowEnd && !acked[ackSeq]) {
                         acked[ackSeq] = true;
                         // Update RTT estimates only if this ACK is for a packet's first transmission.
@@ -182,16 +182,16 @@ public class ClientHandler implements Runnable {
                             SRTT = ALPHA * measuredRTT + (1 - ALPHA) * SRTT; // Update SRTT.
                             RTTVAR = BETA * Math.abs(measuredRTT - SRTT) + (1 - BETA) * RTTVAR;  // Update RTTVAR (using absolute error).
                             RTO = SRTT + Math.max(K * RTTVAR, G); // Recalculate  RTO.
-                            System.out.println("Updated RTT metrics -- measured RTT: " + measuredRTT +
-                                    " ms, SRTT: " + SRTT + " ms, RTTVAR: " + RTTVAR +
-                                    " ms, new RTO: " + RTO + " ms");
+//                            System.out.println("Updated RTT metrics -- measured RTT: " + measuredRTT +
+//                                    " ms, SRTT: " + SRTT + " ms, RTTVAR: " + RTTVAR +
+//                                    " ms, new RTO: " + RTO + " ms");
                             // Mark that we do not update RTT for retransmitted packets.
                             firstTransmission[ackSeq] = false;
                         }
                     }
                 } catch (SocketTimeoutException e) {
                     // No ACK received within the remaining timeout.
-                    System.out.println("Socket timed out waiting for ACKs in the current window.");
+//                    System.out.println("Socket timed out waiting for ACKs in the current window.");
                     break;
                 }
                 // If all packets in the window are acknowledged, exit the waiting loop.
@@ -215,6 +215,6 @@ public class ClientHandler implements Runnable {
         // Send termination packet.
         out.writeInt(-1);
         out.flush();
-        System.out.println("File transmission complete.");
+//        System.out.println("File transmission complete.");
     }
 }
