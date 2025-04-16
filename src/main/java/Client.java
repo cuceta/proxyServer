@@ -11,7 +11,6 @@ public class Client {
 
     private static final int PROXY_PORT = 26896;
 
-    // ICE CREAM image URL is now provided via command line arguments.
     private static String URL;
     private static String drop;
     private static String windowSize;

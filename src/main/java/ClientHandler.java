@@ -116,6 +116,7 @@ public class ClientHandler implements Runnable {
         boolean[] acked = new boolean[totalPackets];
         boolean[] firstTransmission = new boolean[totalPackets];
         long[] sentTimes = new long[totalPackets];
+
         // Mark all packets as pending first transmission.
         for (int i = 0; i < totalPackets; i++) {
             firstTransmission[i] = true;
@@ -194,6 +195,7 @@ public class ClientHandler implements Runnable {
 //                    System.out.println("Socket timed out waiting for ACKs in the current window.");
                     break;
                 }
+
                 // If all packets in the window are acknowledged, exit the waiting loop.
                 boolean allAcked = true;
                 for (int seq = base; seq < windowEnd; seq++) {
